@@ -2,10 +2,48 @@
     "name": "Hero",
     "hp": 100,
     "max_hp": 100,
-    "attack": 10,
+    "attack": 25,
     "defense": 5,
     "level": 1,
-    "exp": 0,
+    "exp": 5,
     "exp_required": 25,
-    "gold": 0
+    "gold": 9950,
+    "inventory": [],
+    "weapons": [
+        {
+            "name": "Dagger",
+            "category": "Weapon",
+            "lvl_requirement": 1,
+            "cost": 15,
+            "durability": 50,
+            "max_durability": 50,
+            "added_hp": 0,
+            "added_def": 0,
+            "added_atk": 15
+        },
+        {
+            "name": "Long Sword",
+            "category": "Weapon",
+            "lvl_requirement": 1,
+            "cost": 40,
+            "durability": 100,
+            "max_durability": 100,
+            "added_hp": 0,
+            "added_def": 0,
+            "added_atk": 20
+        }
+    ],
+    "armors": [],
+    "equipped weapon": {
+        "name": "Dagger",
+        "category": "Weapon",
+        "lvl_requirement": 1,
+        "cost": 15,
+        "durability": 50,
+        "max_durability": 50,
+        "added_hp": 0,
+        "added_def": 0,
+        "added_atk": 15
+    },
+    "equipped armor": null
 }
