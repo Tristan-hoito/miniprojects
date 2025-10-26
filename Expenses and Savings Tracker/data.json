@@ -1,0 +1,27 @@
+{
+    "users": {
+        "Tristan": {
+            "password": "09"
+        },
+        "tantan": {
+            "email": "tan@gmail.com",
+            "password": "aA1"
+        }
+    },
+    "records": {
+        "Tristan": []
+    },
+    "transactions": {
+        "tantan": [
+            {
+                "id": 1,
+                "date": "2025-10-27",
+                "type": "Expense",
+                "amount": 10.0,
+                "category": "a",
+                "description": "",
+                "timestamp": "2025-10-27T00:27:11.189532"
+            }
+        ]
+    }
+}
