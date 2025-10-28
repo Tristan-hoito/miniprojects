@@ -1,26 +1,74 @@
 {
     "users": {
-        "Tristan": {
-            "password": "09"
-        },
-        "tantan": {
-            "email": "tan@gmail.com",
+        "tan": {
+            "email": "tristan@gmail.com",
             "password": "aA1"
         }
     },
-    "records": {
-        "Tristan": []
-    },
     "transactions": {
-        "tantan": [
+        "tan": [
             {
                 "id": 1,
-                "date": "2025-10-27",
+                "date": "2025-10-28",
                 "type": "Expense",
-                "amount": 10.0,
-                "category": "a",
-                "description": "",
-                "timestamp": "2025-10-27T00:27:11.189532"
+                "amount": 100.0,
+                "category": "Food & Groceries",
+                "description": "N/A",
+                "timestamp": "2025-10-28T23:34:30.982136"
+            },
+            {
+                "id": 2,
+                "date": "2025-09-10",
+                "type": "Income",
+                "amount": 100.0,
+                "category": "Allowance",
+                "description": "N/A",
+                "timestamp": "2025-10-29T01:07:24.521107"
+            },
+            {
+                "id": 3,
+                "date": "2025-09-17",
+                "type": "Income",
+                "amount": 1000.0,
+                "category": "Gift",
+                "description": "Birthdayy giftt!!",
+                "timestamp": "2025-10-29T01:17:07.191636"
+            },
+            {
+                "id": 4,
+                "date": "2025-10-29",
+                "type": "Expense",
+                "amount": 150.0,
+                "category": "Entertainment",
+                "description": "comshop with noel",
+                "timestamp": "2025-10-29T01:33:20.877040"
+            },
+            {
+                "id": 5,
+                "date": "2025-10-29",
+                "type": "Expense",
+                "amount": 100.0,
+                "category": "Food & Groceries",
+                "description": "MERYENDAA",
+                "timestamp": "2025-10-29T01:59:24.552038"
+            },
+            {
+                "id": 6,
+                "date": "2025-10-29",
+                "type": "Expense",
+                "amount": 100.0,
+                "category": "School/Work",
+                "description": "N/A",
+                "timestamp": "2025-10-29T02:07:33.997183"
+            },
+            {
+                "id": 7,
+                "date": "2025-09-17",
+                "type": "Expense",
+                "amount": 500.0,
+                "category": "Personal Wants",
+                "description": "jacket",
+                "timestamp": "2025-10-29T02:27:20.708932"
             }
         ]
     }
