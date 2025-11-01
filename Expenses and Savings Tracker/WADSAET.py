@@ -262,7 +262,7 @@ def add_record(data, username):
         print(color("✅ Record added successfully!", C.GREEN, C.BOLD))
 
         print()
-        add_another = input("Add another record ? (y/n): ").lower().strip()
+        add_another = input("Add another record? (y/n) or press Enter to exit: ").lower().strip()
         if add_another == "y":
             clear_terminal()
         else:
@@ -400,7 +400,7 @@ def view_history(data, username):
                 expense_pct = (today_expense / total_expense * 100) if total_expense > 0 else 0
                 income_change = f" ({(today_income - yesterday_income) / yesterday_income * 100:.1f}% change)" if yesterday_income > 0 else ""
                 expense_change = f" ({(today_expense - yesterday_expense) / yesterday_expense * 100:.1f}% change)" if yesterday_expense > 0 else ""
-                print(f"Total Income: ₱{today_income:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{today_expense:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Balance: ₱{today_income - today_expense:.2f}")
+                print(f"Total Income: ₱{today_income:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{today_expense:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Savings: ₱{today_income - today_expense:.2f}")
             for t in filtered:
                 print(color(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
         elif group_choice == "2":
@@ -419,7 +419,7 @@ def view_history(data, username):
                 expense_pct = (yesterday_expense / total_expense * 100) if total_expense > 0 else 0
                 income_change = f" ({(yesterday_income - day_before_income) / day_before_income * 100:.1f}% change)" if day_before_income > 0 else ""
                 expense_change = f" ({(yesterday_expense - day_before_expense) / day_before_expense * 100:.1f}% change)" if day_before_expense > 0 else ""
-                print(f"Total Income: ₱{yesterday_income:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{yesterday_expense:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Balance: ₱{yesterday_income - yesterday_expense:.2f}")
+                print(f"Total Income: ₱{yesterday_income:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{yesterday_expense:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Savings: ₱{yesterday_income - yesterday_expense:.2f}")
             for t in filtered:
                 print(color(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
         elif group_choice == "3":
@@ -463,7 +463,7 @@ def view_history(data, username):
                 expense_pct = (expense_total / total_expense * 100) if total_expense > 0 else 0
                 income_change = f" ({(income_total - prev_income) / prev_income * 100:.1f}% change)" if prev_income and prev_income > 0 else ""
                 expense_change = f" ({(expense_total - prev_expense) / prev_expense * 100:.1f}% change)" if prev_expense and prev_expense > 0 else ""
-                print(f"Total Income: ₱{income_total:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{expense_total:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Balance: ₱{income_total - expense_total:.2f}")
+                print(f"Total Income: ₱{income_total:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{expense_total:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Savings: ₱{income_total - expense_total:.2f}")
                 for t in groups[key]:
                     print(color(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
                 prev_income = income_total
@@ -517,7 +517,7 @@ def view_history(data, username):
                 expense_pct = (expense_total / total_expense * 100) if total_expense > 0 else 0
                 income_change = f" ({(income_total - prev_income) / prev_income * 100:.1f}% change)" if prev_income and prev_income > 0 else ""
                 expense_change = f" ({(expense_total - prev_expense) / prev_expense * 100:.1f}% change)" if prev_expense and prev_expense > 0 else ""
-                print(f"Total Income: ₱{income_total:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{expense_total:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Balance: ₱{income_total - expense_total:.2f}")
+                print(f"Total Income: ₱{income_total:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{expense_total:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Savings: ₱{income_total - expense_total:.2f}")
                 for t in groups[key]:
                     print(color(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
                 prev_income = income_total
@@ -566,7 +566,7 @@ def view_history(data, username):
                 expense_pct = (expense_total / total_expense * 100) if total_expense > 0 else 0
                 income_change = f" ({(income_total - prev_income) / prev_income * 100:.1f}% change)" if prev_income and prev_income > 0 else ""
                 expense_change = f" ({(expense_total - prev_expense) / prev_expense * 100:.1f}% change)" if prev_expense and prev_expense > 0 else ""
-                print(f"Total Income: ₱{income_total:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{expense_total:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Balance: ₱{income_total - expense_total:.2f}")
+                print(f"Total Income: ₱{income_total:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{expense_total:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Savings: ₱{income_total - expense_total:.2f}")
                 for t in groups[key]:
                     print(color(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
                 prev_income = income_total
@@ -613,7 +613,7 @@ def view_history(data, username):
                 expense_pct = (expense_total / total_expense * 100) if total_expense > 0 else 0
                 income_change = f" ({(income_total - prev_income) / prev_income * 100:.1f}% change)" if prev_income and prev_income > 0 else ""
                 expense_change = f" ({(expense_total - prev_expense) / prev_expense * 100:.1f}% change)" if prev_expense and prev_expense > 0 else ""
-                print(f"Total Income: ₱{income_total:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{expense_total:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Balance: ₱{income_total - expense_total:.2f}")
+                print(f"Total Income: ₱{income_total:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{expense_total:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Savings: ₱{income_total - expense_total:.2f}")
                 for t in groups[y]:
                     print(color(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
                 prev_income = income_total
@@ -684,7 +684,7 @@ def view_history(data, username):
         recent_total_income = sum(t["amount"] for t in filtered if t["type"] == "Income")
         recent_total_expense = sum(t["amount"] for t in filtered if t["type"] == "Expense")
         recent_balance = recent_total_income - recent_total_expense
-        print(color(f"Total Income: ₱{recent_total_income:.2f} | Total Expenses: ₱{recent_total_expense:.2f} | Balance: ₱{recent_balance:.2f}", C.WHITE))
+        print(color(f"Total Income: ₱{recent_total_income:.2f} | Total Expenses: ₱{recent_total_expense:.2f} | Savings: ₱{recent_balance:.2f}", C.WHITE))
         # Display transactions
         for t in filtered:
             print(color(f"[{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
@@ -713,7 +713,7 @@ def view_history(data, username):
             date_total_income = sum(t["amount"] for t in filtered if t["type"] == "Income")
             date_total_expense = sum(t["amount"] for t in filtered if t["type"] == "Expense")
             date_balance = date_total_income - date_total_expense
-            print(color(f"Total Income: ₱{date_total_income:.2f} | Total Expenses: ₱{date_total_expense:.2f} | Balance: ₱{date_balance:.2f}", C.WHITE))
+            print(color(f"Total Income: ₱{date_total_income:.2f} | Total Expenses: ₱{date_total_expense:.2f} | Savings: ₱{date_balance:.2f}", C.WHITE))
             # Display transactions
             for t in filtered:
                 print(color(f"[{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
@@ -726,7 +726,7 @@ def view_history(data, username):
             print(color(f"Total Income: ₱{total_income:.2f}", C.GREEN))
             print(color(f"Total Expenses: ₱{total_expense:.2f}", C.RED))
             bal_color = C.GREEN if balance >= 0 else C.RED
-            print(color(f"Total Balance: ₱{balance:.2f}", bal_color, C.BOLD))
+            print(color(f"Total Savings: ₱{balance:.2f}", C.YELLOW))
             print()
             input("Press Enter to return to main menu...")
             return
@@ -750,7 +750,6 @@ def view_history(data, username):
     total_income = sum(t["amount"] for t in filtered if t["type"] == "Income")
     total_expense = sum(t["amount"] for t in filtered if t["type"] == "Expense")
     balance = total_income - total_expense
-
     # Display summary
     print(color("\n---------------- Summary ----------------", C.BOLD))
     print(color(f"Total Income: ₱{total_income:.2f}", C.GREEN))
@@ -836,9 +835,13 @@ def delete_record(data, username):
 
             confirm = input(f"\nDelete all {len(filtered)} record(s) for {date}? (y/n): ").lower().strip()
             if confirm == "y":
-                data["transactions"][username] = [t for t in transactions if t["date"] != date]
-                save_data(data)
-                print(color("✅ Records deleted successfully!", C.GREEN, C.BOLD))
+                confirm2 = input("Are you sure? This action cannot be undone. (type 'YES' to confirm): ").strip()
+                if confirm2 == "YES":
+                    data["transactions"][username] = [t for t in transactions if t["date"] != date]
+                    save_data(data)
+                    print(color("✅ Records deleted successfully!", C.GREEN, C.BOLD))
+                else:
+                    print("Deletion cancelled.")
             else:
                 print("Deletion cancelled.")
         elif delete_choice == "2":
@@ -869,9 +872,13 @@ def delete_record(data, username):
 
             confirm = input("Delete this record? (y/n): ").lower().strip()
             if confirm == "y":
-                data["transactions"][username] = [t for t in transactions if t["id"] != tid]
-                save_data(data)
-                print(color("✅ Record deleted successfully!", C.GREEN, C.BOLD))
+                confirm2 = input("Are you sure? This action cannot be undone. (type 'YES' to confirm): ").strip()
+                if confirm2 == "YES":
+                    data["transactions"][username] = [t for t in transactions if t["id"] != tid]
+                    save_data(data)
+                    print(color("✅ Record deleted successfully!", C.GREEN, C.BOLD))
+                else:
+                    print("Deletion cancelled.")
             else:
                 print("Deletion cancelled.")
         elif delete_choice == "3":
@@ -891,9 +898,13 @@ def delete_record(data, username):
             if confirm1 == "YES":
                 confirm2 = input("This is your final confirmation. Type 'DELETE ALL' to proceed: ").strip()
                 if confirm2 == "DELETE ALL":
-                    data["transactions"][username] = []
-                    save_data(data)
-                    print(color("✅ All records deleted successfully!", C.GREEN, C.BOLD))
+                    confirm3 = input("Last chance! Type 'CONFIRM DELETE ALL' to permanently delete everything: ").strip()
+                    if confirm3 == "CONFIRM DELETE ALL":
+                        data["transactions"][username] = []
+                        save_data(data)
+                        print(color("✅ All records deleted successfully!", C.GREEN, C.BOLD))
+                    else:
+                        print("Deletion cancelled.")
                 else:
                     print("Deletion cancelled.")
             else:
@@ -904,7 +915,7 @@ def delete_record(data, username):
             continue
 
         print()
-        delete_another = input("Delete another record ? (y/n): ").lower().strip()
+        delete_another = input("Delete another record? (y/n) or press Enter to exit: ").lower().strip()
         if delete_another == "y":
             clear_terminal()
         else:
@@ -940,10 +951,19 @@ def edit_record(data, username):
             today = datetime.now().strftime("%Y-%m-%d")
             year, month, day = today.split("-")
         elif use_today == "n":
-            print(color("Date: ", C.BOLD))
-            year = input("Enter year (YYYY): ").strip()
-            month = input("Enter month (MM): ").strip()
-            day = input("Enter day (DD): ").strip()
+            print(color("Date format: YYYY-MM-DD", C.BOLD))
+            date_input = input("Enter date (YYYY-MM-DD): ").strip()
+            if not date_input:
+                print("❌ Date cannot be empty.")
+                input("Press Enter to continue...")
+                continue
+            try:
+                datetime.strptime(date_input, "%Y-%m-%d")
+                year, month, day = date_input.split("-")
+            except ValueError:
+                print("❌ Invalid date format. Use YYYY-MM-DD.")
+                input("Press Enter to continue...")
+                continue
         else:
             print("❌ Please enter 'y' or 'n'.")
             input("Press Enter to continue...")
@@ -1045,29 +1065,31 @@ def edit_record(data, username):
             transaction["description"] = input(color("New description: ", C.BOLD)).strip()
         elif choice == "5":
             clear_terminal()
-            while True:
-                print(color("New Date:", C.BOLD))
-                use_today = input("Use today's date? (y/n): ").lower().strip()
-                if use_today == "y":
-                    new_date = datetime.now().strftime("%Y-%m-%d")
-                    break
-                elif use_today == "n":
-                    new_date = input("Enter date (YYYY-MM-DD): ").strip()
-                    if not new_date:
-                        print("❌ Date cannot be empty.")
-                        continue
-                    try:
-                        datetime.strptime(new_date, "%Y-%m-%d")  # Check format
-                        break
-                    except ValueError:
-                        print("❌ Invalid date format. Use YYYY-MM-DD (e.g., 2023-10-15).")
-                else:
-                    print(color("❌ Please enter 'y' or 'n'.", C.YELLOW))
+            print(color("New Date format: YYYY-MM-DD", C.BOLD))
+            use_today = input("Use today's date? (y/n): ").lower().strip()
+            if use_today == "y":
+                new_date = datetime.now().strftime("%Y-%m-%d")
+            elif use_today == "n":
+                new_date = input("Enter date (YYYY-MM-DD): ").strip()
+                if not new_date:
+                    print("❌ Date cannot be empty.")
+                    continue
+                try:
+                    datetime.strptime(new_date, "%Y-%m-%d")
+                except ValueError:
+                    print("❌ Invalid date format. Use YYYY-MM-DD.")
+                    continue
+            else:
+                print("❌ Please enter 'y' or 'n'.")
+                continue
             transaction["date"] = new_date
         else:
             print("Invalid choice.")
             input("Press Enter to continue...")
             continue
+
+        print(color("\nUpdated record preview:", C.BOLD))
+        print(color(f"[{transaction['id']}] {transaction['date']} | {transaction['type']} | ₱{transaction['amount']:.2f} | {transaction['category']} | {transaction['description']}", C.CYAN))
 
         confirm = input("Save changes? (y/n): ").lower().strip()
         if confirm == "y":
@@ -1077,7 +1099,7 @@ def edit_record(data, username):
             print("Changes discarded.")
 
         print()
-        edit_another = input("Edit another record ? (y/n): ").lower().strip()
+        edit_another = input("Edit another record? (y/n) or press Enter to exit: ").lower().strip()
         if edit_another == "y":
             clear_terminal()
         else:
@@ -1091,6 +1113,7 @@ def dashboard(data, username):
         total_income = sum(t["amount"] for t in transactions if t["type"] == "Income")
         total_expense = sum(t["amount"] for t in transactions if t["type"] == "Expense")
         balance = total_income - total_expense
+        total_savings = balance
 
         # Calculate summaries by category
         income_summary = {}
@@ -1133,8 +1156,7 @@ def dashboard(data, username):
                 print(f"  - {cat}: ₱{expense_summary[cat]:.2f} ({pct:.1f}%)")
             print()
 
-        # Suggestion Tip Section
-        print(color("------ Suggestion Tip ------", C.BOLD))
+        # Calculate data for analytics and tips
         today = datetime.now().date()
         yesterday = today - timedelta(days=1)
         today_str = today.strftime("%Y-%m-%d")
@@ -1151,13 +1173,60 @@ def dashboard(data, username):
         has_today_data = today_expense > 0 or today_income > 0
         has_yesterday_data = yesterday_expense > 0 or yesterday_income > 0
 
+        # Analytics Section
+        print(color("------ Analytics ------", C.BOLD))
+        unique_dates = set(t["date"] for t in transactions)
+        num_days = len(unique_dates) if unique_dates else 1
+        avg_expense_per_day = total_expense / num_days if num_days > 0 else 0
+        avg_income_per_day = total_income / num_days if num_days > 0 else 0
+        avg_savings_per_day = total_savings / num_days if num_days > 0 else 0
+        print(color(f"Average Expense per Day: ₱{avg_expense_per_day:.2f}", C.RED))
+        print(color(f"Average Income per Day: ₱{avg_income_per_day:.2f}", C.GREEN))
+        print(color(f"Average Savings per Day: ₱{avg_savings_per_day:.2f}", C.YELLOW))
+        print(color(f"Total Days Tracked: {num_days}", C.WHITE))
+        if has_today_data and has_yesterday_data:
+            if yesterday_expense > 0:
+                expense_change_val = ((today_expense - yesterday_expense) / yesterday_expense) * 100
+                if expense_change_val > 0:
+                    expense_msg = color(f"Expenses increased by {expense_change_val:.1f}% (₱{yesterday_expense:.2f} to ₱{today_expense:.2f}).", C.RED)
+                elif expense_change_val < 0:
+                    expense_msg = color(f"Expenses decreased by {abs(expense_change_val):.1f}% (₱{yesterday_expense:.2f} to ₱{today_expense:.2f}).", C.GREEN)
+                else:
+                    expense_msg = color("Expenses same as yesterday.", C.YELLOW)
+            else:
+                expense_msg = color(f"No expenses yesterday, today ₱{today_expense:.2f}.", C.BLUE)
+            if yesterday_savings != 0:
+                savings_change_val = ((today_savings - yesterday_savings) / abs(yesterday_savings)) * 100
+                if savings_change_val > 0:
+                    savings_msg = color(f"Savings increased by {savings_change_val:.1f}% (₱{yesterday_savings:.2f} to ₱{today_savings:.2f}).", C.YELLOW)
+                elif savings_change_val < 0:
+                    savings_msg = color(f"Savings decreased by {abs(savings_change_val):.1f}% (₱{yesterday_savings:.2f} to ₱{today_savings:.2f}).", C.YELLOW)
+                else:
+                    savings_msg = color("Savings same as yesterday.", C.YELLOW)
+            else:
+                savings_msg = color(f"No savings yesterday for percentage calculation.", C.BLUE)
+            print(expense_msg)
+            print(savings_msg)
+        elif has_yesterday_data:
+            print(color(f"No records for today. Yesterday's expenses: ₱{yesterday_expense:.2f}, Income: ₱{yesterday_income:.2f}, Savings: ₱{yesterday_savings:.2f}.", C.MAGENTA))
+        elif has_today_data:
+            print(color(f"No records for yesterday. Today's expenses: ₱{today_expense:.2f}, Income: ₱{today_income:.2f}, Savings: ₱{today_savings:.2f}.", C.MAGENTA))
+        else:
+            print(color("No recent data for daily change calculations.", C.MAGENTA))
+        print()
+
+        # Suggestion Section - Provides personalized financial tips based on user's spending patterns
+        print(color("------ Suggestion ------", C.BOLD))
+
         # Calculate expense trend over last 7 days for cases with no today data
+        # This helps provide tips when daily data is missing
         last_7_days = [today - timedelta(days=i) for i in range(1, 8)]
         last_7_expenses = [sum(t["amount"] for t in transactions if t["type"] == "Expense" and t["date"] == d.strftime("%Y-%m-%d")) for d in last_7_days]
         avg_expense_last_7 = sum(last_7_expenses) / len(last_7_expenses) if last_7_expenses else 0
         expense_trend = yesterday_expense - avg_expense_last_7 if avg_expense_last_7 > 0 else 0
 
         # Find top expense categories for saving tips, prioritizing essentials
+        # Essentials are prioritized for better financial guidance
         expense_categories = {}
         for t in transactions:
             if t["type"] == "Expense":
@@ -1169,19 +1238,25 @@ def dashboard(data, username):
         top_essentials = sorted([(cat, amt) for cat, amt in expense_categories.items() if cat in essentials], key=lambda x: essentials.index(x[0]))
         top_desires = sorted([(cat, amt) for cat, amt in expense_categories.items() if cat in desires], key=lambda x: x[1], reverse=True)
 
-        # Define secondary tips arrays
+        # Define focus areas for tips - uses top essentials and desires for personalized advice
         focus_areas = ", ".join([cat[0] for cat in top_essentials[:2]]) if top_essentials else "essentials"
         focus_desires = ", ".join([cat[0] for cat in top_desires[:2]]) if top_desires else "wants"
+
+        # Secondary tips arrays - provide additional guidance based on financial scenarios
+        # These are categorized by situation: spending too much, saving too much, or expense trends
         secondary_tips_spend_too_much = [
-            f"Focus on essentials like {focus_areas} for efficient savings by planning purchases ahead.",
-            f"Prioritize essentials like {focus_areas} to stabilize your savings and avoid unnecessary debt.",
-            f"Optimize spending on {focus_areas} to reduce overall expenses and build a stronger financial foundation.",
-            f"Lessen spends on wants and entertainment to free up more for essentials like {focus_areas}.",
-            f"Cut back on non-essential entertainment and personal wants to better afford {focus_areas}.",
-            f"Redirect funds from entertainment and wants towards essentials like {focus_areas} for long-term benefits.",
-            f"Review and reduce entertainment expenses to prioritize essentials such as {focus_areas}.",
-            f"Avoid impulse buys on wants to ensure essentials like {focus_areas} are fully covered."
+            f"Focus on cutting back on {focus_desires} for efficient savings by planning purchases ahead.",
+            f"Prioritize essentials by reducing spending on {focus_desires} to stabilize your savings and avoid unnecessary debt.",
+            f"Optimize your budget by limiting {focus_desires} to reduce overall expenses and build a stronger financial foundation.",
+            f"Lessen spends on {focus_desires} to free up more for essentials.",
+            f"Cut back on non-essential {focus_desires} to prioritize needs over wants.",
+            f"Redirect funds from {focus_desires} towards essentials for long-term benefits.",
+            f"Review and reduce {focus_desires} expenses to prioritize essentials.",
+            f"Avoid impulse buys on {focus_desires} to ensure essentials are covered.",
+            f"Track daily expenses on {focus_desires} to identify areas for cost reduction and better budgeting.",
+            f"Set weekly limits for {focus_desires} to prevent overspending and encourage mindful purchasing."
         ]
+
         secondary_tips_saved_too_much = [
             f"Great job on saving! Treat yourself to something from {focus_desires} after hitting savings goals, but don't spend everything.",
             f"Excellent savings progress! Enjoy a small indulgence from {focus_desires} once essentials are covered, keeping savings intact.",
@@ -1190,10 +1265,49 @@ def dashboard(data, username):
             f"Outstanding savings achievement! Use some savings for a small treat from {focus_desires} while maintaining your emergency fund.",
             f"Well done on your savings! Balance rewards from {focus_desires} with continued saving to build wealth over time.",
             f"Impressive savings rate! Reward your discipline with a small indulgence from {focus_desires}, then resume saving.",
-            f"Congratulations on saving! Allocate a small portion for fun from {focus_desires} while preserving the rest for security."
+            f"Congratulations on saving! Allocate a small portion for fun from {focus_desires} while preserving the rest for security.",
+            f"With strong savings, explore low-risk investments to grow your funds while treating yourself to {focus_desires}.",
+            f"Maintain your savings momentum by setting aside rewards from {focus_desires} after achieving financial milestones."
         ]
 
-        # Calculate changes first
+        secondary_tips_trend_increase = [
+            f"Expenses increased recently; focus on reducing costs in {focus_desires} to get back on track.",
+            f"With rising expenses, review {focus_desires} for opportunities to cut back and stabilize spending.",
+            f"Your spending has been increasing; prioritize budgeting for {focus_desires} to prevent further rises.",
+            f"Expense uptick noted; optimize {focus_desires} by finding cheaper alternatives or reducing frequency.",
+            f"Rising expenses over the past week; concentrate on essentials like {focus_areas} to curb the increase.",
+            f"Your recent spending is higher; implement strict limits on {focus_desires} to reverse the increase.",
+            f"Expenses climbing; audit {focus_desires} for unnecessary costs and eliminate them promptly.",
+            f"Increased weekly spending; redirect focus to {focus_areas} for better financial control.",
+            f"Expense rise observed; plan ahead for {focus_desires} to avoid impulsive purchases driving costs up.",
+            f"With expenses up, emphasize cost-saving measures in {focus_desires} to flatten the increase."
+        ]
+        secondary_tips_trend_decrease = [
+            f"Great job lowering expenses! Keep optimizing {focus_areas} to maintain this positive decrease.",
+            f"Expenses decreased; continue focusing on {focus_areas} for sustained savings growth.",
+            f"Positive expense reduction; reward yourself with a small treat from {focus_desires} while keeping {focus_areas} in check.",
+            f"Your spending is lower; invest the savings from {focus_areas} into building an emergency fund.",
+            f"Excellent expense control; use the freed-up funds from {focus_areas} to pay off debts or save more.",
+            f"Decreased spending noted; maintain discipline in {focus_areas} and consider increasing savings contributions.",
+            f"Expenses down; celebrate by planning a budget-friendly activity from {focus_desires} without overspending.",
+            f"Your expenses are decreasing; analyze what worked in {focus_areas} and apply it consistently.",
+            f"Lower expenses achieved; allocate extra savings from {focus_areas} towards long-term financial goals.",
+            f"Expense reduction success; balance rewards from {focus_desires} with continued focus on {focus_areas}."
+        ]
+        secondary_tips_trend_stable = [
+            f"Stable expenses; keep monitoring {focus_areas} to ensure they remain within budget.",
+            f"Expenses steady; use this period to review {focus_desires} and plan for occasional indulgences.",
+            f"Your spending is consistent; focus on automating savings while keeping {focus_areas} optimized.",
+            f"Stable expenses maintained; consider setting new goals for {focus_areas} to further reduce costs.",
+            f"Expense stability achieved; reward consistency with a small allowance for {focus_desires}.",
+            f"Steady spending; audit {focus_areas} for potential efficiencies without disrupting balance.",
+            f"Expenses stable; use the predictability to build a buffer in savings from {focus_areas}.",
+            f"Your spending is consistent; plan for future expenses in {focus_areas} to avoid unexpected spikes.",
+            f"Stable expenses; explore ways to enhance savings by fine-tuning {focus_desires} spending.",
+            f"Expense stability; maintain focus on {focus_areas} and gradually increase savings contributions."
+        ]
+
+        # Calculate percentage changes for expense and savings from yesterday to today
         expense_change = 0
         savings_change = 0
         if has_yesterday_data:
@@ -1202,7 +1316,8 @@ def dashboard(data, username):
             if yesterday_savings != 0:
                 savings_change = ((today_savings - yesterday_savings) / abs(yesterday_savings)) * 100
 
-        # Define scenario-based tips for suggestion section based on expense change
+        # Define scenario-based primary tips for suggestion section based on data availability and changes
+        # These tips are general advice tailored to the user's current financial situation
         if not has_today_data and not has_yesterday_data:
             suggestion_tips = [
                 "💡 Tip: Start by tracking your daily coffee runs or lunch expenses. Small purchases add up quickly and seeing them can motivate better choices.",
@@ -1286,54 +1401,30 @@ def dashboard(data, username):
                     "💡 Tip: Do weekly check-ins focusing on essentials. Most people find reviewing progress helps stay on track and adjust for Food & Transport needs."
                 ]
 
-        # Select a random tip from the scenario-based list
+        # Select a random primary tip from the scenario-based list
         selected_suggestion_tip = random.choice(suggestion_tips)
 
+        # Display tips based on data availability and financial changes
+        # Primary tip is always shown, secondary tip is shown for specific scenarios to provide extra guidance
         if not has_today_data and not has_yesterday_data:
             print(color("No expenses or income recorded for today or yesterday. Start tracking your transactions to get personalized tips!", C.YELLOW))
             print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
         elif not has_today_data:
             # Base tip on expense/savings increase or decrease from last 7 days
+            print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
             if expense_trend > 0:
-                print(color(f"Based on the last 7 days, your expenses increased by ₱{expense_trend:.2f} yesterday compared to average. Focus on optimizing essentials today.", C.RED))
-                print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+                secondary_tip = random.choice(secondary_tips_trend_increase)
+                print(color(secondary_tip, C.BLUE))
             elif expense_trend < 0:
-                print(color(f"Based on the last 7 days, your expenses decreased by ₱{abs(expense_trend):.2f} yesterday compared to average. Good job!", C.GREEN))
-                print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+                secondary_tip = random.choice(secondary_tips_trend_decrease)
+                print(color(secondary_tip, C.BLUE))
             else:
-                print(color("Your expenses are stable compared to the last 7 days. Keep up the consistent tracking!", C.YELLOW))
-                print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+                secondary_tip = random.choice(secondary_tips_trend_stable)
+                print(color(secondary_tip, C.BLUE))
         elif not has_yesterday_data:
-            print(color("No data from yesterday. Today's expenses: ₱{:.2f}, Income: ₱{:.2f}, Savings: ₱{:.2f}. Keep tracking to compare trends!".format(today_expense, today_income, today_savings), C.BLUE))
             print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
         else:
             # Base analysis on yesterday's data to advise today's spending
-            if yesterday_expense > 0:
-                expense_change = ((today_expense - yesterday_expense) / yesterday_expense) * 100
-                if expense_change > 0:
-                    expense_msg = color(f"Your expenses increased by {expense_change:.1f}% compared to yesterday (₱{yesterday_expense:.2f} to ₱{today_expense:.2f}).", C.RED)
-                elif expense_change < 0:
-                    expense_msg = color(f"Your expenses decreased by {abs(expense_change):.1f}% compared to yesterday (₱{yesterday_expense:.2f} to ₱{today_expense:.2f}).", C.GREEN)
-                else:
-                    expense_msg = color("Your expenses remained the same as yesterday.", C.YELLOW)
-            else:
-                expense_msg = color(f"Yesterday had no expenses, today you spent ₱{today_expense:.2f}.", C.BLUE)
-
-            if yesterday_savings != 0:
-                savings_change = ((today_savings - yesterday_savings) / abs(yesterday_savings)) * 100
-                if savings_change > 0:
-                    savings_msg = color(f"Your savings increased by {savings_change:.1f}% compared to yesterday (₱{yesterday_savings:.2f} to ₱{today_savings:.2f}).", C.GREEN)
-                elif savings_change < 0:
-                    savings_msg = color(f"Your savings decreased by {abs(savings_change):.1f}% compared to yesterday (₱{yesterday_savings:.2f} to ₱{today_savings:.2f}).", C.RED)
-                else:
-                    savings_msg = color("Your savings remained the same as yesterday.", C.YELLOW)
-            else:
-                savings_msg = color(f"Yesterday had no savings, today your savings are ₱{today_savings:.2f}.", C.BLUE)
-
-            print(expense_msg)
-            print(savings_msg)
-
-            # Tips based on yesterday's data for today's spending, prioritizing essentials
             if yesterday_expense > 0:
                 if expense_change > 10:
                     print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
@@ -1342,11 +1433,12 @@ def dashboard(data, username):
                         print(color(secondary_tip, C.BLUE))
                 elif expense_change < -10:
                     print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+                    secondary_tip = random.choice(secondary_tips_trend_decrease)
+                    print(color(secondary_tip, C.BLUE))
                 elif savings_change > 20:
                     print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
-                    if top_essentials:
-                        secondary_tip = random.choice(secondary_tips_saved_too_much)
-                        print(color(secondary_tip, C.BLUE))
+                    secondary_tip = random.choice(secondary_tips_saved_too_much)
+                    print(color(secondary_tip, C.BLUE))
                 elif savings_change < -20:
                     print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
                     if top_essentials:
@@ -1354,6 +1446,8 @@ def dashboard(data, username):
                         print(color(secondary_tip, C.BLUE))
                 else:
                     print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+                    secondary_tip = random.choice(secondary_tips_trend_stable)
+                    print(color(secondary_tip, C.BLUE))
             else:
                 print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
 
