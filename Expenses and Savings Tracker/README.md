@@ -1,6 +1,6 @@
 # 💰 Expense & Savings Tracker
 
-![Python](https://img.shields.io/badge/Python-3.x-green?style=flat-square) ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
+![Python](https://img.shields.io/badge/Python-3.x-green?style=flat-square) 
 
 A fun and simple command-line application to track your expenses and income, helping you manage your finances like a pro! 📊💸
 
@@ -40,11 +40,6 @@ No external dependencies required – pure Python magic! ✨
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 Made with ❤️ for better financial habits. Happy tracking! 🎉
+
 
