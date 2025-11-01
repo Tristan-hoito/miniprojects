@@ -1,7 +1,8 @@
 import json
 import os
+import random
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 DATA_FILE = "data.json"
 
@@ -64,10 +65,14 @@ def sign_up(data):
     print(color("----------------", C.BOLD))
     print(color("Create a new user account.", C.DIM))
     print()
+
+
+
     confirm = input("Do you really want to sign up? (y/n): ").lower()
     if confirm != "y":
         print("Returning to main menu...")
         input("Press Enter to continue...")
+        clear_terminal()
         return
 
     email = input("Enter your email: ").strip()
@@ -105,11 +110,15 @@ def login(data):
     print(color("----------------", C.BOLD))
     print(color("Log in to your existing account.", C.DIM))
     print()
+
+
+
     confirm = input("Do you really want to log in? (y/n): ").lower()
     if confirm != "y":
         print("Returning to main menu...")
         input("Press Enter to continue...")
-        return None
+        clear_terminal()
+        return
 
     print(color("\nCredentials", C.BOLD))
     user_input = input("Enter username or email: ").strip()
@@ -142,111 +151,122 @@ def login(data):
     return username
 
 def add_record(data, username):
-    clear_terminal()
-    print(color("Add Record", C.BOLD))
-    print(color("----------------", C.BOLD))
-    print(color("Add a new expense or income record.", C.DIM))
-    print()
-    confirm = input("Do you really want to add a record? (y/n): ").lower()
-    if confirm != "y":
-        print("Returning to main menu...")
-        input("Press Enter to continue...")
-        return
-
-    clear_terminal()
-
-    # Validate date with option for today
     while True:
-        print(color("Date:", C.BOLD))
-        use_today = input("Use today's date? (y/n): ").lower().strip()
-        if use_today == "y":
-            date = datetime.now().strftime("%Y-%m-%d")
-            break
-        elif use_today == "n":
-            date = input("Enter date (YYYY-MM-DD): ").strip()
-            if not date:
-                print("❌ Date cannot be empty.")
+        clear_terminal()
+        print(color("Add Record", C.BOLD))
+        print(color("----------------", C.BOLD))
+        print(color("Add a new expense or income record.", C.DIM))
+        print()
+
+
+
+        confirm = input("Do you really want to add a record? (y/n): ").lower()
+        if confirm != "y":
+            print("Returning to main menu...")
+            input("Press Enter to continue...")
+            clear_terminal()
+            return
+        clear_terminal()
+
+        # Validate date with option for today
+        while True:
+            print(color("Date:", C.BOLD))
+            use_today = input("Use today's date? (y/n): ").lower().strip()
+            if use_today == "y":
+                date = datetime.now().strftime("%Y-%m-%d")
+                break
+            elif use_today == "n":
+                date = input("Enter date (YYYY-MM-DD): ").strip()
+                if not date:
+                    print("❌ Date cannot be empty.")
+                    continue
+                try:
+                    datetime.strptime(date, "%Y-%m-%d")  # Check format
+                    break
+                except ValueError:
+                    print("❌ Invalid date format. Use YYYY-MM-DD (e.g., 2023-10-15).")
+            else:
+                print(color("❌ Please enter 'y' or 'n'.", C.YELLOW))
+
+        # Validate type with menu for ease
+        while True:
+            print(color("\nSelect type:", C.BOLD))
+            print("1. Expense")
+            print("2. Income")
+            type_choice = input("Choose (1 or 2): ").strip()
+            if type_choice == "1":
+                type_ = "Expense"
+                break
+            elif type_choice == "2":
+                type_ = "Income"
+                break
+            else:
+                print(color("❌ Invalid choice. Enter 1 for Expense or 2 for Income.", C.RED))
+
+        # Validate category based on type
+        if type_ == "Expense":
+            expense_categories = ["Food & Groceries", "Transportation", "Entertainment", "Personal Needs", "Personal Wants", "Bills", "School/Work"]
+            print(color("\nSelect expense category:", C.BOLD))
+            for i, cat in enumerate(expense_categories, 1):
+                print(f"{i}. {cat}")
+            while True:
+                cat_choice = input("Choose (1-7): ").strip()
+                if cat_choice.isdigit() and 1 <= int(cat_choice) <= 7:
+                    category = expense_categories[int(cat_choice) - 1]
+                    break
+                else:
+                    print("❌ Invalid choice. Enter 1-7.")
+        else:  # Income
+            income_categories = ["Allowance", "Work", "Reward", "Gift"]
+            print(color("\nSelect income category:", C.BOLD))
+            for i, cat in enumerate(income_categories, 1):
+                print(f"{i}. {cat}")
+            while True:
+                cat_choice = input("Choose (1-4): ").strip()
+                if cat_choice.isdigit() and 1 <= int(cat_choice) <= 4:
+                    category = income_categories[int(cat_choice) - 1]
+                    break
+                else:
+                    print("❌ Invalid choice. Enter 1-4.")
+
+        # Validate amount
+        while True:
+            amount_input = input("\nEnter amount: ").strip()
+            if not amount_input:
+                print("❌ Amount cannot be empty. Please enter a valid number.")
                 continue
             try:
-                datetime.strptime(date, "%Y-%m-%d")  # Check format
-                break
+                amount = float(amount_input)
+                if amount <= 0:
+                    print("❌ Amount must be a positive number greater than 0.")
+                    continue
+                break  # Valid input, exit loop
             except ValueError:
-                print("❌ Invalid date format. Use YYYY-MM-DD (e.g., 2023-10-15).")
+                print("❌ Invalid amount. Please enter a valid number (e.g., 100.50).")
+
+        desc = input("Add description? (y/n): ").lower().strip()
+        description = input("Enter description: ").strip() if desc == "y" else "N/A"
+
+        transaction = {
+            "id": len(data["transactions"][username]) + 1,
+            "date": date,
+            "type": type_,
+            "amount": amount,
+            "category": category,
+            "description": description,
+            "timestamp": datetime.now().isoformat()
+        }
+
+        data["transactions"][username].append(transaction)
+        save_data(data)
+        print(color("✅ Record added successfully!", C.GREEN, C.BOLD))
+
+        print()
+        add_another = input("Add another record ? (y/n): ").lower().strip()
+        if add_another == "y":
+            clear_terminal()
         else:
-            print(color("❌ Please enter 'y' or 'n'.", C.YELLOW))
-
-    # Validate type with menu for ease
-    while True:
-        print(color("\nSelect type:", C.BOLD))
-        print("1. Expense")
-        print("2. Income")
-        type_choice = input("Choose (1 or 2): ").strip()
-        if type_choice == "1":
-            type_ = "Expense"
             break
-        elif type_choice == "2":
-            type_ = "Income"
-            break
-        else:
-            print(color("❌ Invalid choice. Enter 1 for Expense or 2 for Income.", C.RED))
-
-    # Validate category based on type
-    if type_ == "Expense":
-        expense_categories = ["Food & Groceries", "Transportation", "Entertainment", "Personal Needs", "Personal Wants", "Bills", "School/Work"]
-        print(color("\nSelect expense category:", C.BOLD))
-        for i, cat in enumerate(expense_categories, 1):
-            print(f"{i}. {cat}")
-        while True:
-            cat_choice = input("Choose (1-7): ").strip()
-            if cat_choice.isdigit() and 1 <= int(cat_choice) <= 7:
-                category = expense_categories[int(cat_choice) - 1]
-                break
-            else:
-                print("❌ Invalid choice. Enter 1-7.")
-    else:  # Income
-        income_categories = ["Allowance", "Work", "Reward", "Gift"]
-        print(color("\nSelect income category:", C.BOLD))
-        for i, cat in enumerate(income_categories, 1):
-            print(f"{i}. {cat}")
-        while True:
-            cat_choice = input("Choose (1-4): ").strip()
-            if cat_choice.isdigit() and 1 <= int(cat_choice) <= 4:
-                category = income_categories[int(cat_choice) - 1]
-                break
-            else:
-                print("❌ Invalid choice. Enter 1-4.")
-
-    # Validate amount
-    while True:
-        amount_input = input("\nEnter amount: ").strip()
-        if not amount_input:
-            print("❌ Amount cannot be empty. Please enter a valid number.")
-            continue
-        try:
-            amount = float(amount_input)
-            if amount <= 0:
-                print("❌ Amount must be a positive number greater than 0.")
-                continue
-            break  # Valid input, exit loop
-        except ValueError:
-            print("❌ Invalid amount. Please enter a valid number (e.g., 100.50).")
-
-    desc = input("Add description? (y/n): ").lower().strip()
-    description = input("Enter description: ").strip() if desc == "y" else "N/A"
-
-    transaction = {
-        "id": len(data["transactions"][username]) + 1,
-        "date": date,
-        "type": type_,
-        "amount": amount,
-        "category": category,
-        "description": description,
-        "timestamp": datetime.now().isoformat()
-    }
-
-    data["transactions"][username].append(transaction)
-    save_data(data)
-    print(color("✅ Record added successfully!", C.GREEN, C.BOLD))
     input("Press Enter to return to main menu...")
 
 def view_history(data, username):
@@ -255,6 +275,8 @@ def view_history(data, username):
     print(color("----------------", C.BOLD))
     print(color("View your transaction history.", C.DIM))
     print()
+
+
 
     transactions = data["transactions"][username]
     if not transactions:
@@ -276,8 +298,8 @@ def view_history(data, username):
     if filter_choice == "2":
         clear_terminal()
         print(color("Select type:", C.BOLD))
-        print("1. Expense")
-        print("2. Income")
+        print(color("1. Expense", C.WHITE))
+        print(color("2. Income", C.WHITE))
         type_choice = input("Choose (1 or 2): ").strip()
         if type_choice == "1":
             type_ = "Expense"
@@ -286,28 +308,59 @@ def view_history(data, username):
             type_ = "Income"
             categories = ["Allowance", "Work", "Reward", "Gift"]
         else:
-            print("❌ Invalid choice.")
+            print(color("❌ Invalid choice.", C.RED))
             input("Press Enter to continue...")
             return
-        print(color("\nSelect category:", C.BOLD))
+        # Calculate percentages for categories
+        overall_total = sum(t["amount"] for t in transactions if t["type"] == type_)
+        category_totals = {}
+        for cat in categories:
+            category_totals[cat] = sum(t["amount"] for t in transactions if t["category"] == cat and t["type"] == type_)
+        print(color(f"\nSelect category for {type_}:", C.BOLD))
         for i, cat in enumerate(categories, 1):
-            print(f"{i}. {cat}")
+            pct = (category_totals[cat] / overall_total * 100) if overall_total > 0 else 0
+            print(color(f"{i}. {cat} ({pct:.1f}%)", C.WHITE))
         cat_choice = input(f"Choose (1-{len(categories)}): ").strip()
         if cat_choice.isdigit() and 1 <= int(cat_choice) <= len(categories):
             category = categories[int(cat_choice) - 1]
             filtered = [t for t in transactions if t["category"] == category and t["type"] == type_]
+            category_total = category_totals[category]
+            pct = (category_total / overall_total * 100) if overall_total > 0 else 0
+            clear_terminal()
+            print(color(f"---------------- {category} ({pct:.1f}%) ----------------", C.WHITE, C.BOLD))
+            # Summary total in white at the top
+            print(color(f"Total for {category}: ₱{category_total:.2f}", C.WHITE))
+            # Display transactions
+            for t in filtered:
+                print(color(f"[{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
+            # Calculate and display summary
+            total_income = sum(t["amount"] for t in filtered if t["type"] == "Income")
+            total_expense = sum(t["amount"] for t in filtered if t["type"] == "Expense")
+            balance = total_income - total_expense
+            print()
+            print(color("---------------- Summary ----------------", C.BOLD))
+            print(color(f"Total Income: ₱{total_income:.2f}", C.GREEN))
+            print(color(f"Total Expenses: ₱{total_expense:.2f}", C.RED))
+            bal_color = C.GREEN if balance >= 0 else C.RED
+            print(color(f"Total Balance: ₱{balance:.2f}", bal_color, C.BOLD))
+            print()
+            input("Press Enter to return to main menu...")
+            return
         else:
-            print("❌ Invalid choice.")
+            print(color("❌ Invalid choice.", C.RED))
             input("Press Enter to continue...")
             return
     elif filter_choice == "3":
         clear_terminal()
         print(color("Choose date filter:", C.BOLD))
-        print(color("1. By Day (YYYY-MM-DD)", C.WHITE))
-        print(color("2. By Month (YYYY-MM)", C.WHITE))
-        print(color("3. By Year (YYYY)", C.WHITE))
-        group_choice = input("Choose (1-3): ").strip()
-        
+        print(color("1. Today's transactions", C.WHITE))
+        print(color("2. Yesterday's transactions", C.WHITE))
+        print(color("3. By Day (how many days?)", C.WHITE))
+        print(color("4. By Week (how many weeks?)", C.WHITE))
+        print(color("5. By Month (how many months?)", C.WHITE))
+        print(color("6. By Year (how many years?)", C.WHITE))
+        group_choice = input("Choose (1-6): ").strip()
+
         def ymd_keys(d):
         # Returns (year, month, day)
             try:
@@ -320,96 +373,369 @@ def view_history(data, username):
                 m = int(parts[1]) if len(parts) > 1 and parts[1].isdigit() else 0
                 dd = int(parts[2]) if len(parts) > 2 and parts[2].isdigit() else 0
                 return y, m, dd
-            
+
         order = input("Ascending or Descending by date (a/d): ").lower().strip()
         filtered = sorted(filtered, key=lambda x: x["date"], reverse=(order == "d"))
 
-        if group_choice == "3":
-            # Group by year
-            groups = {}
+        # Calculate overall totals for percentages
+        total_income = sum(t["amount"] for t in filtered if t["type"] == "Income")
+        total_expense = sum(t["amount"] for t in filtered if t["type"] == "Expense")
+
+        prev_income = None
+        prev_expense = None
+
+        if group_choice == "1":
+            # Today's transactions
+            clear_terminal()
+            today = datetime.now().strftime("%Y-%m-%d")
+            yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+            filtered = [t for t in transactions if t["date"] == today]
+            print(color(f"\n---------------- {today} ----------------", C.BOLD))
+            if filtered:
+                today_income = sum(t["amount"] for t in filtered if t["type"] == "Income")
+                today_expense = sum(t["amount"] for t in filtered if t["type"] == "Expense")
+                yesterday_income = sum(t["amount"] for t in transactions if t["date"] == yesterday and t["type"] == "Income")
+                yesterday_expense = sum(t["amount"] for t in transactions if t["date"] == yesterday and t["type"] == "Expense")
+                income_pct = (today_income / total_income * 100) if total_income > 0 else 0
+                expense_pct = (today_expense / total_expense * 100) if total_expense > 0 else 0
+                income_change = f" ({(today_income - yesterday_income) / yesterday_income * 100:.1f}% change)" if yesterday_income > 0 else ""
+                expense_change = f" ({(today_expense - yesterday_expense) / yesterday_expense * 100:.1f}% change)" if yesterday_expense > 0 else ""
+                print(f"Total Income: ₱{today_income:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{today_expense:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Balance: ₱{today_income - today_expense:.2f}")
             for t in filtered:
-                y, _, _ = ymd_keys(t["date"])
-                groups.setdefault(y, []).append(t)
-            for y in sorted(groups.keys(), reverse=(order == "d")):
-                print(color(f"\n------ {y} ------", C.BOLD))
+                print(color(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
+        elif group_choice == "2":
+            # Yesterday's transactions
+            clear_terminal()
+            yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+            day_before = (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
+            filtered = [t for t in transactions if t["date"] == yesterday]
+            print(color(f"\n---------------- {yesterday} ----------------", C.BOLD))
+            if filtered:
+                yesterday_income = sum(t["amount"] for t in filtered if t["type"] == "Income")
+                yesterday_expense = sum(t["amount"] for t in filtered if t["type"] == "Expense")
+                day_before_income = sum(t["amount"] for t in transactions if t["date"] == day_before and t["type"] == "Income")
+                day_before_expense = sum(t["amount"] for t in transactions if t["date"] == day_before and t["type"] == "Expense")
+                income_pct = (yesterday_income / total_income * 100) if total_income > 0 else 0
+                expense_pct = (yesterday_expense / total_expense * 100) if total_expense > 0 else 0
+                income_change = f" ({(yesterday_income - day_before_income) / day_before_income * 100:.1f}% change)" if day_before_income > 0 else ""
+                expense_change = f" ({(yesterday_expense - day_before_expense) / day_before_expense * 100:.1f}% change)" if day_before_expense > 0 else ""
+                print(f"Total Income: ₱{yesterday_income:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{yesterday_expense:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Balance: ₱{yesterday_income - yesterday_expense:.2f}")
+            for t in filtered:
+                print(color(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
+        elif group_choice == "3":
+            # Group by day (YYYY-MM-DD)
+            while True:
+                num_input = input("How many days? (enter number or 'all'): ").strip().lower()
+                if not num_input:
+                    print("❌ Input cannot be empty.")
+                    continue
+                if num_input == 'all':
+                    num = None  # Will handle all
+                    break
+                try:
+                    num = int(num_input)
+                    if num <= 0:
+                        print("❌ Number must be a positive integer.")
+                        continue
+                    break
+                except ValueError:
+                    print("❌ Invalid input. Enter a positive integer or 'all'.")
+            groups = {}
+            if num is None:
+                # All days
+                for t in filtered:
+                    groups.setdefault(t["date"], []).append(t)
+            else:
+                end_date = datetime.now().date()
+                start_date = end_date - timedelta(days=num)
+                for t in transactions:
+                    dt = datetime.strptime(t["date"], "%Y-%m-%d").date()
+                    if start_date <= dt <= end_date:
+                        groups.setdefault(t["date"], []).append(t)
+            sorted_keys = sorted(groups.keys(), reverse=(order == "d"))
+            prev_income = None
+            prev_expense = None
+            for key in sorted_keys:
+                print(color(f"\n---------------- {key} ----------------", C.BOLD))
+                income_total = sum(x["amount"] for x in groups[key] if x["type"] == "Income")
+                expense_total = sum(x["amount"] for x in groups[key] if x["type"] == "Expense")
+                income_pct = (income_total / total_income * 100) if total_income > 0 else 0
+                expense_pct = (expense_total / total_expense * 100) if total_expense > 0 else 0
+                income_change = f" ({(income_total - prev_income) / prev_income * 100:.1f}% change)" if prev_income and prev_income > 0 else ""
+                expense_change = f" ({(expense_total - prev_expense) / prev_expense * 100:.1f}% change)" if prev_expense and prev_expense > 0 else ""
+                print(f"Total Income: ₱{income_total:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{expense_total:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Balance: ₱{income_total - expense_total:.2f}")
+                for t in groups[key]:
+                    print(color(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
+                prev_income = income_total
+                prev_expense = expense_total
+        elif group_choice == "4":
+            # Group by week (YYYY-WW)
+            while True:
+                num_input = input("How many weeks? (enter number or 'all'): ").strip().lower()
+                if not num_input:
+                    print("❌ Input cannot be empty.")
+                    continue
+                if num_input == 'all':
+                    num = None  # Will handle all
+                    break
+                try:
+                    num = int(num_input)
+                    if num <= 0:
+                        print("❌ Number must be a positive integer.")
+                        continue
+                    break
+                except ValueError:
+                    print("❌ Invalid input. Enter a positive integer or 'all'.")
+            groups = {}
+            if num is None:
+                # All weeks
+                for t in filtered:
+                    try:
+                        dt = datetime.strptime(t["date"], "%Y-%m-%d")
+                        y, w, _ = dt.isocalendar()
+                        key = f"{y:04d}-W{w:02d}"
+                        groups.setdefault(key, []).append(t)
+                    except:
+                        continue  # Skip malformed dates
+            else:
+                end_date = datetime.now().date()
+                start_date = end_date - timedelta(weeks=num)
+                for t in transactions:
+                    dt = datetime.strptime(t["date"], "%Y-%m-%d").date()
+                    if start_date <= dt <= end_date:
+                        y, w, _ = dt.isocalendar()
+                        key = f"{dt.year:04d}-W{w:02d}"
+                        groups.setdefault(key, []).append(t)
+            sorted_keys = sorted(groups.keys(), reverse=(order == "d"))
+            prev_income = None
+            prev_expense = None
+            for key in sorted_keys:
+                print(color(f"\n---------------- {key} ----------------", C.BOLD))
+                income_total = sum(x["amount"] for x in groups[key] if x["type"] == "Income")
+                expense_total = sum(x["amount"] for x in groups[key] if x["type"] == "Expense")
+                income_pct = (income_total / total_income * 100) if total_income > 0 else 0
+                expense_pct = (expense_total / total_expense * 100) if total_expense > 0 else 0
+                income_change = f" ({(income_total - prev_income) / prev_income * 100:.1f}% change)" if prev_income and prev_income > 0 else ""
+                expense_change = f" ({(expense_total - prev_expense) / prev_expense * 100:.1f}% change)" if prev_expense and prev_expense > 0 else ""
+                print(f"Total Income: ₱{income_total:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{expense_total:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Balance: ₱{income_total - expense_total:.2f}")
+                for t in groups[key]:
+                    print(color(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
+                prev_income = income_total
+                prev_expense = expense_total
+        elif group_choice == "5":
+            # Group by month (YYYY-MM)
+            while True:
+                num_input = input("How many months? (enter number or 'all'): ").strip().lower()
+                if not num_input:
+                    print("❌ Input cannot be empty.")
+                    continue
+                if num_input == 'all':
+                    num = None  # Will handle all
+                    break
+                try:
+                    num = int(num_input)
+                    if num <= 0:
+                        print("❌ Number must be a positive integer.")
+                        continue
+                    break
+                except ValueError:
+                    print("❌ Invalid input. Enter a positive integer or 'all'.")
+            groups = {}
+            if num is None:
+                # All months
+                for t in filtered:
+                    y, m, _ = ymd_keys(t["date"])
+                    key = f"{y:04d}-{m:02d}"
+                    groups.setdefault(key, []).append(t)
+            else:
+                end_date = datetime.now().date()
+                start_date = end_date - timedelta(days=num*30)  # Approximate months
+                for t in transactions:
+                    dt = datetime.strptime(t["date"], "%Y-%m-%d").date()
+                    if start_date <= dt <= end_date:
+                        key = f"{dt.year:04d}-{dt.month:02d}"
+                        groups.setdefault(key, []).append(t)
+            sorted_keys = sorted(groups.keys(), reverse=(order == "d"))
+            prev_income = None
+            prev_expense = None
+            for key in sorted_keys:
+                print(color(f"\n---------------- {key} ----------------", C.BOLD))
+                income_total = sum(x["amount"] for x in groups[key] if x["type"] == "Income")
+                expense_total = sum(x["amount"] for x in groups[key] if x["type"] == "Expense")
+                income_pct = (income_total / total_income * 100) if total_income > 0 else 0
+                expense_pct = (expense_total / total_expense * 100) if total_expense > 0 else 0
+                income_change = f" ({(income_total - prev_income) / prev_income * 100:.1f}% change)" if prev_income and prev_income > 0 else ""
+                expense_change = f" ({(expense_total - prev_expense) / prev_expense * 100:.1f}% change)" if prev_expense and prev_expense > 0 else ""
+                print(f"Total Income: ₱{income_total:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{expense_total:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Balance: ₱{income_total - expense_total:.2f}")
+                for t in groups[key]:
+                    print(color(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
+                prev_income = income_total
+                prev_expense = expense_total
+        elif group_choice == "6":
+            # Group by year
+            while True:
+                num_input = input("How many years? (enter number or 'all'): ").strip().lower()
+                if not num_input:
+                    print("❌ Input cannot be empty.")
+                    continue
+                if num_input == 'all':
+                    num = None  # Will handle all
+                    break
+                try:
+                    num = int(num_input)
+                    if num <= 0:
+                        print("❌ Number must be a positive integer.")
+                        continue
+                    break
+                except ValueError:
+                    print("❌ Invalid input. Enter a positive integer or 'all'.")
+            groups = {}
+            if num is None:
+                # All years
+                for t in filtered:
+                    y, _, _ = ymd_keys(t["date"])
+                    groups.setdefault(y, []).append(t)
+            else:
+                end_date = datetime.now().date()
+                start_date = end_date - timedelta(days=num*365)  # Approximate years
+                for t in transactions:
+                    dt = datetime.strptime(t["date"], "%Y-%m-%d").date()
+                    if start_date <= dt <= end_date:
+                        groups.setdefault(dt.year, []).append(t)
+            sorted_keys = sorted(groups.keys(), reverse=(order == "d"))
+            prev_income = None
+            prev_expense = None
+            for y in sorted_keys:
+                print(color(f"\n---------------- {y} ----------------", C.BOLD))
                 income_total = sum(x["amount"] for x in groups[y] if x["type"] == "Income")
                 expense_total = sum(x["amount"] for x in groups[y] if x["type"] == "Expense")
-                print(f"Total Income: ₱{income_total:.2f} | Total Expense: ₱{expense_total:.2f} | Balance: ₱{income_total - expense_total:.2f}")
+                income_pct = (income_total / total_income * 100) if total_income > 0 else 0
+                expense_pct = (expense_total / total_expense * 100) if total_expense > 0 else 0
+                income_change = f" ({(income_total - prev_income) / prev_income * 100:.1f}% change)" if prev_income and prev_income > 0 else ""
+                expense_change = f" ({(expense_total - prev_expense) / prev_expense * 100:.1f}% change)" if prev_expense and prev_expense > 0 else ""
+                print(f"Total Income: ₱{income_total:.2f} ({color('{:.1f}'.format(income_pct), C.GREEN)}%){income_change} | Total Expense: ₱{expense_total:.2f} ({color('{:.1f}'.format(expense_pct), C.RED)}%){expense_change} | Balance: ₱{income_total - expense_total:.2f}")
                 for t in groups[y]:
-                    print(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']} | {t['category']} | {t['description']}")
-        elif group_choice == "2":
-            # Group by month (YYYY-MM)
-            groups = {}
-            for t in filtered:
-                y, m, _ = ymd_keys(t["date"])
-                key = f"{y:04d}-{m:02d}"
-                groups.setdefault(key, []).append(t)
-            for key in sorted(groups.keys(), reverse=(order == "d")):
-                print(color(f"\n------ {key} ------", C.BOLD))
-                income_total = sum(x["amount"] for x in groups[key] if x["type"] == "Income")
-                expense_total = sum(x["amount"] for x in groups[key] if x["type"] == "Expense")
-                print(f"Total Income: ₱{income_total:.2f} | Total Expense: ₱{expense_total:.2f} | Balance: ₱{income_total - expense_total:.2f}")
-                for t in groups[key]:
-                    print(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']} | {t['category']} | {t['description']}")
-        elif group_choice == "1":
-            # Group by day (YYYY-MM-DD)
-            groups = {}
-            for t in filtered:
-                key = t["date"]
-                groups.setdefault(key, []).append(t)
-            for key in sorted(groups.keys(), reverse=(order == "d")):
-                print(color(f"\n------ {key} ------", C.BOLD))
-                income_total = sum(x["amount"] for x in groups[key] if x["type"] == "Income")
-                expense_total = sum(x["amount"] for x in groups[key] if x["type"] == "Expense")
-                print(f"Total Income: ₱{income_total:.2f} | Total Expense: ₱{expense_total:.2f} | Balance: ₱{income_total - expense_total:.2f}")
-                for t in groups[key]:
-                    print(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']} | {t['category']} | {t['description']}")
+                    print(color(f"  [{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
+                prev_income = income_total
+                prev_expense = expense_total
         else:
             # No grouping
             for t in filtered:
-                print(color(f"\n[{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.GRAY))
+                print(color(f"[{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
 
     elif filter_choice == "4":
         clear_terminal()
         print(color("Select type:", C.BOLD))
-        print("1. Expense")
-        print("2. Income")
+        print(color("1. Expense", C.WHITE))
+        print(color("2. Income", C.WHITE))
         type_choice = input("Choose (1 or 2): ").strip()
         if type_choice == "1":
             type_ = "Expense"
         elif type_choice == "2":
             type_ = "Income"
         else:
-            print("❌ Invalid choice.")
+            print(color("❌ Invalid choice.", C.RED))
             input("Press Enter to continue...")
             return
         filtered = [t for t in transactions if t["type"] == type_]
+        # Calculate overall totals for percentage
+        overall_total = sum(t["amount"] for t in transactions if t["type"] == type_)
+        type_total = sum(t["amount"] for t in filtered)
+        pct = (type_total / overall_total * 100) if overall_total > 0 else 0
+        clear_terminal()
+        print(color(f"---------------- {type_} ({pct:.1f}%) ----------------", C.WHITE, C.BOLD))
+        # Summary total in white at the top
+        print(color(f"Total for {type_}: ₱{type_total:.2f}", C.WHITE))
+        # Display transactions
+        for t in filtered:
+            print(color(f"[{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
+        # Calculate and display summary
+        total_income = sum(t["amount"] for t in filtered if t["type"] == "Income")
+        total_expense = sum(t["amount"] for t in filtered if t["type"] == "Expense")
+        balance = total_income - total_expense
+        print()
+        print(color("---------------- Summary ----------------", C.BOLD))
+        print(color(f"Total Income: ₱{total_income:.2f}", C.GREEN))
+        print(color(f"Total Expenses: ₱{total_expense:.2f}", C.RED))
+        bal_color = C.GREEN if balance >= 0 else C.RED
+        print(color(f"Total Balance: ₱{balance:.2f}", bal_color, C.BOLD))
+        print()
+        input("Press Enter to return to main menu...")
+        return
     elif filter_choice == "5":
         while True:
             clear_terminal()
             num_input = input("How many recent transactions? ").strip()
             if not num_input:
-                print("❌ Number cannot be empty.")
+                print(color("❌ Number cannot be empty.", C.RED))
                 continue
             try:
                 num = int(num_input)
                 if num <= 0:
-                    print("❌ Number must be a positive integer.")
+                    print(color("❌ Number must be a positive integer.", C.RED))
                     continue
                 break
             except ValueError:
-                print("❌ Invalid number. Please enter a positive integer.")
+                print(color("❌ Invalid number. Please enter a positive integer.", C.RED))
         filtered = transactions[-num:] if num < len(transactions) else transactions
+        clear_terminal()
+        print(color(f"---------------- Recent {num} Transactions ----------------", C.WHITE, C.BOLD))
+        # Summary total in white at the top
+        recent_total_income = sum(t["amount"] for t in filtered if t["type"] == "Income")
+        recent_total_expense = sum(t["amount"] for t in filtered if t["type"] == "Expense")
+        recent_balance = recent_total_income - recent_total_expense
+        print(color(f"Total Income: ₱{recent_total_income:.2f} | Total Expenses: ₱{recent_total_expense:.2f} | Balance: ₱{recent_balance:.2f}", C.WHITE))
+        # Display transactions
+        for t in filtered:
+            print(color(f"[{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
+        # Calculate and display summary
+        total_income = sum(t["amount"] for t in filtered if t["type"] == "Income")
+        total_expense = sum(t["amount"] for t in filtered if t["type"] == "Expense")
+        balance = total_income - total_expense
+        print()
+        print(color("---------------- Summary ----------------", C.BOLD))
+        print(color(f"Total Income: ₱{total_income:.2f}", C.GREEN))
+        print(color(f"Total Expenses: ₱{total_expense:.2f}", C.RED))
+        bal_color = C.GREEN if balance >= 0 else C.RED
+        print(color(f"Total Balance: ₱{balance:.2f}", bal_color, C.BOLD))
+        print()
+        input("Press Enter to return to main menu...")
+        return
     elif filter_choice == "6":
         clear_terminal()
         date = input("Enter date (YYYY-MM-DD): ").strip()
         try:
             datetime.strptime(date, "%Y-%m-%d")
             filtered = [t for t in transactions if t["date"] == date]
+            clear_terminal()
+            print(color(f"---------------- Transactions for {date} ----------------", C.WHITE, C.BOLD))
+            # Summary total in white at the top
+            date_total_income = sum(t["amount"] for t in filtered if t["type"] == "Income")
+            date_total_expense = sum(t["amount"] for t in filtered if t["type"] == "Expense")
+            date_balance = date_total_income - date_total_expense
+            print(color(f"Total Income: ₱{date_total_income:.2f} | Total Expenses: ₱{date_total_expense:.2f} | Balance: ₱{date_balance:.2f}", C.WHITE))
+            # Display transactions
+            for t in filtered:
+                print(color(f"[{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
+            # Calculate and display summary
+            total_income = sum(t["amount"] for t in filtered if t["type"] == "Income")
+            total_expense = sum(t["amount"] for t in filtered if t["type"] == "Expense")
+            balance = total_income - total_expense
+            print()
+            print(color("---------------- Summary ----------------", C.BOLD))
+            print(color(f"Total Income: ₱{total_income:.2f}", C.GREEN))
+            print(color(f"Total Expenses: ₱{total_expense:.2f}", C.RED))
+            bal_color = C.GREEN if balance >= 0 else C.RED
+            print(color(f"Total Balance: ₱{balance:.2f}", bal_color, C.BOLD))
+            print()
+            input("Press Enter to return to main menu...")
+            return
         except ValueError:
-            print("❌ Invalid date format. Use YYYY-MM-DD.")
+            print(color("❌ Invalid date format. Use YYYY-MM-DD.", C.RED))
             input("Press Enter to continue...")
             return
+
+
     elif filter_choice != "1":
         print("❌ Invalid choice.")
         input("Press Enter to continue...")
@@ -436,157 +762,326 @@ def view_history(data, username):
     if filter_choice == "3":
         # For date filter, display grouped as before, but summary is overall
         pass  # Already handled above
-    else:
-        # Display transactions
+    elif filter_choice in ["1", "2"]:
+        # Display transactions for all and category filters
         for t in filtered:
-            print(color(f"[{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.GRAY))
+            print(color(f"[{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.DIM))
 
     input("\nPress Enter to return to main menu...")
 
+def delete_record(data, username):
+    while True:
+        clear_terminal()
+        print(color("Delete Record", C.BOLD))
+        print(color("----------------", C.BOLD))
+        print(color("Delete an existing transaction record.", C.DIM))
+        print()
+
+
+
+        confirm = input("Do you really want to delete a record? (y/n): ").lower()
+        if confirm != "y":
+            print("Returning to main menu...")
+            input("Press Enter to continue...")
+            return
+        clear_terminal()
+
+        clear_terminal()
+        transactions = data["transactions"][username]
+        if not transactions:
+            print("No transactions found.")
+            input("Press Enter to continue...")
+            return
+
+        print(color("Delete options:", C.BOLD))
+        print("1. Delete by date")
+        print("2. Delete by transaction ID")
+        print("3. Delete all records")
+        delete_choice = input("Choose (1-3): ").strip()
+
+        if delete_choice == "1":
+            clear_terminal()
+            print(color("Delete by Date", C.BOLD))
+            print(color("Enter the date to delete all records for that date.", C.DIM))
+            print()
+            use_today = input("Use today's date? (y/n): ").lower().strip()
+            if use_today == "y":
+                date = datetime.now().strftime("%Y-%m-%d")
+            elif use_today == "n":
+                date = input("Enter date (YYYY-MM-DD): ").strip()
+                if not date:
+                    print("❌ Date cannot be empty.")
+                    input("Press Enter to continue...")
+                    continue
+                try:
+                    datetime.strptime(date, "%Y-%m-%d")
+                except ValueError:
+                    print("❌ Invalid date format. Use YYYY-MM-DD.")
+                    input("Press Enter to continue...")
+                    continue
+            else:
+                print("❌ Please enter 'y' or 'n'.")
+                input("Press Enter to continue...")
+                continue
+
+            filtered = [t for t in transactions if t["date"] == date]
+            if not filtered:
+                print(f"No transactions found for {date}.")
+                input("Press Enter to continue...")
+                continue
+
+            print(color(f"\nTransactions for {date}:", C.BOLD))
+            for t in filtered:
+                print(color(f"[{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.GRAY))
+
+            confirm = input(f"\nDelete all {len(filtered)} record(s) for {date}? (y/n): ").lower().strip()
+            if confirm == "y":
+                data["transactions"][username] = [t for t in transactions if t["date"] != date]
+                save_data(data)
+                print(color("✅ Records deleted successfully!", C.GREEN, C.BOLD))
+            else:
+                print("Deletion cancelled.")
+        elif delete_choice == "2":
+            clear_terminal()
+            print(color("Delete by ID", C.BOLD))
+            print(color("Enter the transaction ID to delete.", C.DIM))
+            print()
+            tid_input = input("Enter transaction ID: ").strip()
+            if not tid_input:
+                print("❌ ID cannot be empty.")
+                input("Press Enter to continue...")
+                continue
+            try:
+                tid = int(tid_input)
+            except ValueError:
+                print("❌ Invalid ID. Must be a number.")
+                input("Press Enter to continue...")
+                continue
+
+            transaction = next((t for t in transactions if t["id"] == tid), None)
+            if not transaction:
+                print("Transaction not found.")
+                input("Press Enter to continue...")
+                continue
+
+            print(color("Transaction to delete:", C.BOLD))
+            print(color(f"[{transaction['id']}] {transaction['date']} | {transaction['type']} | ₱{transaction['amount']:.2f} | {transaction['category']} | {transaction['description']}", C.GRAY))
+
+            confirm = input("Delete this record? (y/n): ").lower().strip()
+            if confirm == "y":
+                data["transactions"][username] = [t for t in transactions if t["id"] != tid]
+                save_data(data)
+                print(color("✅ Record deleted successfully!", C.GREEN, C.BOLD))
+            else:
+                print("Deletion cancelled.")
+        elif delete_choice == "3":
+            clear_terminal()
+            print(color("Delete All Records", C.BOLD))
+            print(color("⚠️  WARNING: This will permanently delete ALL your transaction records!", C.RED, C.BOLD))
+            print(color("This action cannot be undone.", C.RED))
+            print()
+            total_records = len(transactions)
+            if total_records == 0:
+                print("No records to delete.")
+                input("Press Enter to continue...")
+                continue
+            print(color(f"You have {total_records} transaction(s) that will be deleted.", C.YELLOW))
+            print()
+            confirm1 = input("Are you absolutely sure you want to delete ALL records? (type 'YES' to confirm): ").strip()
+            if confirm1 == "YES":
+                confirm2 = input("This is your final confirmation. Type 'DELETE ALL' to proceed: ").strip()
+                if confirm2 == "DELETE ALL":
+                    data["transactions"][username] = []
+                    save_data(data)
+                    print(color("✅ All records deleted successfully!", C.GREEN, C.BOLD))
+                else:
+                    print("Deletion cancelled.")
+            else:
+                print("Deletion cancelled.")
+        else:
+            print(color("❌ Invalid choice.", C.RED))
+            input("Press Enter to continue...")
+            continue
+
+        print()
+        delete_another = input("Delete another record ? (y/n): ").lower().strip()
+        if delete_another == "y":
+            clear_terminal()
+        else:
+            break
+    input("Press Enter to return to main menu...")
+
 def edit_record(data, username):
-    clear_terminal()
-    print(color("Edit Record", C.BOLD))
-    print(color("----------------", C.BOLD))
-    print(color("Edit an existing transaction record.", C.DIM))
-    print()
+    while True:
+        clear_terminal()
+        print(color("Edit Record", C.BOLD))
+        print(color("----------------", C.BOLD))
+        print(color("Edit an existing transaction record.", C.DIM))
+        print()
 
-    transactions = data["transactions"][username]
-    if not transactions:
-        print("No transactions found.")
-        input("Press Enter to return to main menu...")
-        return
 
-    print(color("Date: ", C.BOLD))
-    year = input("Enter year (YYYY): ").strip()
-    month = input("Enter month (MM): ").strip()
-    day = input("Enter day (DD): ").strip()
 
-    filtered = [t for t in transactions if t["date"].startswith(f"{year}-{month}-{day}")]
-    if not filtered:
-        print("No transactions found for that date.")
-        input("Press Enter to continue...")
-        return
+        confirm = input("Do you really want to edit a record? (y/n): ").lower()
+        if confirm != "y":
+            print("Returning to main menu...")
+            input("Press Enter to continue...")
+            return
+        clear_terminal()
 
-    print(color(f"\n--------------- {year}-{month}-{day} ---------------", C.BOLD))
-    for t in filtered:
-        print(color(f"[{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.GRAY))
+        clear_terminal()
+        transactions = data["transactions"][username]
+        if not transactions:
+            print("No transactions found.")
+            input("Press Enter to continue...")
+            return
 
-    tid_input = input("\nEnter transaction ID to edit: ").strip()
-    if not tid_input:
-        print("❌ ID cannot be empty.")
-        input("Press Enter to continue...")
-        return
-    try:
-        tid = int(tid_input)
-    except ValueError:
-        print("❌ Invalid ID. Must be a number.")
-        input("Press Enter to continue...")
-        return
+        use_today = input("Use today's date? (y/n): ").lower().strip()
+        if use_today == "y":
+            today = datetime.now().strftime("%Y-%m-%d")
+            year, month, day = today.split("-")
+        elif use_today == "n":
+            print(color("Date: ", C.BOLD))
+            year = input("Enter year (YYYY): ").strip()
+            month = input("Enter month (MM): ").strip()
+            day = input("Enter day (DD): ").strip()
+        else:
+            print("❌ Please enter 'y' or 'n'.")
+            input("Press Enter to continue...")
+            continue
 
-    for t in transactions:
-        if t["id"] == tid:
-            print(color("\nWhat do you want to edit?", C.BOLD))
-            print("1. Type\n2. Amount\n3. Category\n4. Description\n5. Date")
-            choice = input("Choose between the options: ").strip()
+        filtered = [t for t in transactions if t["date"].startswith(f"{year}-{month}-{day}")]
+        if not filtered:
+            print("No transactions found for that date.")
+            input("Press Enter to continue...")
+            continue
 
-            if choice == "1":
+        print(color(f"\n--------------- {year}-{month}-{day} ---------------", C.BOLD))
+        for t in filtered:
+            print(color(f"[{t['id']}] {t['date']} | {t['type']} | ₱{t['amount']:.2f} | {t['category']} | {t['description']}", C.GRAY))
+
+        tid_input = input("\nEnter transaction ID to edit: ").strip()
+        if not tid_input:
+            print("❌ ID cannot be empty.")
+            input("Press Enter to continue...")
+            continue
+        try:
+            tid = int(tid_input)
+        except ValueError:
+            print("❌ Invalid ID. Must be a number.")
+            input("Press Enter to continue...")
+            continue
+
+        transaction = next((t for t in transactions if t["id"] == tid), None)
+        if not transaction:
+            print("Transaction not found.")
+            input("Press Enter to continue...")
+            continue
+
+        print(color("\nWhat do you want to edit?", C.BOLD))
+        print("1. Type\n2. Amount\n3. Category\n4. Description\n5. Date")
+        choice = input("Choose between the options: ").strip()
+
+        if choice == "1":
+            while True:
+                clear_terminal()
+                print(color("\nSelect new type:", C.BOLD))
+                print("1. Expense")
+                print("2. Income")
+                new_choice = input("Choose (1 or 2): ").strip()
+                if new_choice == "1":
+                    transaction["type"] = "Expense"
+                    break
+                elif new_choice == "2":
+                    transaction["type"] = "Income"
+                    break
+                else:
+                    print("❌ Invalid choice. Enter 1 or 2.")
+        elif choice == "2":
+            while True:
+                clear_terminal()
+                amount_input = input(color("New amount: ", C.BOLD)).strip()
+                if not amount_input:
+                    print("❌ Amount cannot be empty.")
+                    continue
+                try:
+                    new_amount = float(amount_input)
+                    if new_amount <= 0:
+                        print("❌ Amount must be positive.")
+                        continue
+                    transaction["amount"] = new_amount
+                    break
+                except ValueError:
+                    print("❌ Invalid amount. Enter a number.")
+
+        elif choice == "3":
+            # Edit category based on current type
+            clear_terminal()
+            if transaction["type"] == "Expense":
+                expense_categories = ["Food & Groceries", "Transportation", "Entertainment", "Personal Needs", "Personal Wants", "Bills", "School/Work"]
+                print(color("Select new expense category:", C.BOLD))
+                for i, cat in enumerate(expense_categories, 1):
+                    print(f"{i}. {cat}")
                 while True:
-                    clear_terminal()
-                    print(color("\nSelect new type:", C.BOLD))
-                    print("1. Expense")
-                    print("2. Income")
-                    new_choice = input("Choose (1 or 2): ").strip()
-                    if new_choice == "1":
-                        t["type"] = "Expense"
-                        break
-                    elif new_choice == "2":
-                        t["type"] = "Income"
+                    cat_choice = input("Choose (1-7): ").strip()
+                    if cat_choice.isdigit() and 1 <= int(cat_choice) <= 7:
+                        transaction["category"] = expense_categories[int(cat_choice) - 1]
                         break
                     else:
-                        print("❌ Invalid choice. Enter 1 or 2.")
-            elif choice == "2":
+                        print("❌ Invalid choice. Enter 1-7.")
+            else:  # Income
+                income_categories = ["Allowance", "Work", "Reward", "Gift"]
+                print(color("Select new income category:", C.BOLD))
+                for i, cat in enumerate(income_categories, 1):
+                    print(f"{i}. {cat}")
                 while True:
-                    clear_terminal()
-                    amount_input = input(color("New amount: ", C.BOLD)).strip()
-                    if not amount_input:
-                        print("❌ Amount cannot be empty.")
+                    cat_choice = input("Choose (1-4): ").strip()
+                    if cat_choice.isdigit() and 1 <= int(cat_choice) <= 4:
+                        transaction["category"] = income_categories[int(cat_choice) - 1]
+                        break
+                    else:
+                        print("❌ Invalid choice. Enter 1-4.")
+        elif choice == "4":
+            clear_terminal()
+            transaction["description"] = input(color("New description: ", C.BOLD)).strip()
+        elif choice == "5":
+            clear_terminal()
+            while True:
+                print(color("New Date:", C.BOLD))
+                use_today = input("Use today's date? (y/n): ").lower().strip()
+                if use_today == "y":
+                    new_date = datetime.now().strftime("%Y-%m-%d")
+                    break
+                elif use_today == "n":
+                    new_date = input("Enter date (YYYY-MM-DD): ").strip()
+                    if not new_date:
+                        print("❌ Date cannot be empty.")
                         continue
                     try:
-                        new_amount = float(amount_input)
-                        if new_amount <= 0:
-                            print("❌ Amount must be positive.")
-                            continue
-                        t["amount"] = new_amount
+                        datetime.strptime(new_date, "%Y-%m-%d")  # Check format
                         break
                     except ValueError:
-                        print("❌ Invalid amount. Enter a number.")
+                        print("❌ Invalid date format. Use YYYY-MM-DD (e.g., 2023-10-15).")
+                else:
+                    print(color("❌ Please enter 'y' or 'n'.", C.YELLOW))
+            transaction["date"] = new_date
+        else:
+            print("Invalid choice.")
+            input("Press Enter to continue...")
+            continue
 
-            elif choice == "3":
-                # Edit category based on current type
-                clear_terminal()
-                if t["type"] == "Expense":
-                    expense_categories = ["Food & Groceries", "Transportation", "Entertainment", "Personal Needs", "Personal Wants", "Bills", "School/Work"]
-                    print(color("Select new expense category:", C.BOLD))
-                    for i, cat in enumerate(expense_categories, 1):
-                        print(f"{i}. {cat}")
-                    while True:
-                        cat_choice = input("Choose (1-7): ").strip()
-                        if cat_choice.isdigit() and 1 <= int(cat_choice) <= 7:
-                            t["category"] = expense_categories[int(cat_choice) - 1]
-                            break
-                        else:
-                            print("❌ Invalid choice. Enter 1-7.")
-                else:  # Income
-                    income_categories = ["Allowance", "Work", "Reward", "Gift"]
-                    print(color("Select new income category:", C.BOLD))
-                    for i, cat in enumerate(income_categories, 1):
-                        print(f"{i}. {cat}")
-                    while True:
-                        cat_choice = input("Choose (1-4): ").strip()
-                        if cat_choice.isdigit() and 1 <= int(cat_choice) <= 4:
-                            t["category"] = income_categories[int(cat_choice) - 1]
-                            break
-                        else:
-                            print("❌ Invalid choice. Enter 1-4.")
-            elif choice == "4":
-                clear_terminal()
-                t["description"] = input(color("New description: ", C.BOLD)).strip()
-            elif choice == "5":
-                clear_terminal()
-                while True:
-                    print(color("New Date:", C.BOLD))
-                    use_today = input("Use today's date? (y/n): ").lower().strip()
-                    if use_today == "y":
-                        new_date = datetime.now().strftime("%Y-%m-%d")
-                        break
-                    elif use_today == "n":
-                        new_date = input("Enter date (YYYY-MM-DD): ").strip()
-                        if not new_date:
-                            print("❌ Date cannot be empty.")
-                            continue
-                        try:
-                            datetime.strptime(new_date, "%Y-%m-%d")  # Check format
-                            break
-                        except ValueError:
-                            print("❌ Invalid date format. Use YYYY-MM-DD (e.g., 2023-10-15).")
-                    else:
-                        print(color("❌ Please enter 'y' or 'n'.", C.YELLOW))
-                t["date"] = new_date
-            else:
-                print("Invalid choice.")
-                input("Press Enter to continue...")
-                return
+        confirm = input("Save changes? (y/n): ").lower().strip()
+        if confirm == "y":
+            save_data(data)
+            print(color("✅ Record updated successfully!", C.GREEN, C.BOLD))
+        else:
+            print("Changes discarded.")
 
-            confirm = input("Save changes? (y/n): ").lower().strip()
-            if confirm == "y":
-                save_data(data)
-                print(color("✅ Record updated successfully!", C.GREEN, C.BOLD))
-            else:
-                print("Changes discarded.")
+        print()
+        edit_another = input("Edit another record ? (y/n): ").lower().strip()
+        if edit_another == "y":
+            clear_terminal()
+        else:
             break
-    else:
-        print("Transaction not found.")
-
     input("Press Enter to return to main menu...")
 
 def dashboard(data, username):
@@ -612,6 +1107,8 @@ def dashboard(data, username):
         print(color("Your financial dashboard.\nSummarizes your Money flow!", C.DIM))
         print()
 
+
+
         # Financial Summary Section
         print(color("------ Financial Summary ------", C.BOLD))
         print(color(f"Total Income: ₱{total_income:.2f}", C.GREEN))
@@ -624,22 +1121,251 @@ def dashboard(data, username):
         if income_summary:
             print(color("------ Income Breakdown ------", C.BOLD))
             for cat in sorted(income_summary.keys()):
-                print(f"  - {cat}: ₱{income_summary[cat]:.2f}")
+                pct = (income_summary[cat] / total_income * 100) if total_income > 0 else 0
+                print(f"  - {cat}: ₱{income_summary[cat]:.2f} ({pct:.1f}%)")
             print()
 
         # Expense Breakdown Section
         if expense_summary:
             print(color("------ Expense Breakdown ------", C.BOLD))
             for cat in sorted(expense_summary.keys()):
-                print(f"  - {cat}: ₱{expense_summary[cat]:.2f}")
+                pct = (expense_summary[cat] / total_expense * 100) if total_expense > 0 else 0
+                print(f"  - {cat}: ₱{expense_summary[cat]:.2f} ({pct:.1f}%)")
             print()
+
+        # Suggestion Tip Section
+        print(color("------ Suggestion Tip ------", C.BOLD))
+        today = datetime.now().date()
+        yesterday = today - timedelta(days=1)
+        today_str = today.strftime("%Y-%m-%d")
+        yesterday_str = yesterday.strftime("%Y-%m-%d")
+
+        today_expense = sum(t["amount"] for t in transactions if t["type"] == "Expense" and t["date"] == today_str)
+        yesterday_expense = sum(t["amount"] for t in transactions if t["type"] == "Expense" and t["date"] == yesterday_str)
+        today_income = sum(t["amount"] for t in transactions if t["type"] == "Income" and t["date"] == today_str)
+        yesterday_income = sum(t["amount"] for t in transactions if t["type"] == "Income" and t["date"] == yesterday_str)
+
+        today_savings = today_income - today_expense
+        yesterday_savings = yesterday_income - yesterday_expense
+
+        has_today_data = today_expense > 0 or today_income > 0
+        has_yesterday_data = yesterday_expense > 0 or yesterday_income > 0
+
+        # Calculate expense trend over last 7 days for cases with no today data
+        last_7_days = [today - timedelta(days=i) for i in range(1, 8)]
+        last_7_expenses = [sum(t["amount"] for t in transactions if t["type"] == "Expense" and t["date"] == d.strftime("%Y-%m-%d")) for d in last_7_days]
+        avg_expense_last_7 = sum(last_7_expenses) / len(last_7_expenses) if last_7_expenses else 0
+        expense_trend = yesterday_expense - avg_expense_last_7 if avg_expense_last_7 > 0 else 0
+
+        # Find top expense categories for saving tips, prioritizing essentials
+        expense_categories = {}
+        for t in transactions:
+            if t["type"] == "Expense":
+                expense_categories[t["category"]] = expense_categories.get(t["category"], 0) + t["amount"]
+
+        essentials = ["Food & Groceries", "Transportation", "School/Work", "Personal Needs", "Bills"]
+        desires = ["Entertainment", "Personal Wants"]
+
+        top_essentials = sorted([(cat, amt) for cat, amt in expense_categories.items() if cat in essentials], key=lambda x: essentials.index(x[0]))
+        top_desires = sorted([(cat, amt) for cat, amt in expense_categories.items() if cat in desires], key=lambda x: x[1], reverse=True)
+
+        # Define secondary tips arrays
+        focus_areas = ", ".join([cat[0] for cat in top_essentials[:2]]) if top_essentials else "essentials"
+        focus_desires = ", ".join([cat[0] for cat in top_desires[:2]]) if top_desires else "wants"
+        secondary_tips_spend_too_much = [
+            f"Focus on essentials like {focus_areas} for efficient savings by planning purchases ahead.",
+            f"Prioritize essentials like {focus_areas} to stabilize your savings and avoid unnecessary debt.",
+            f"Optimize spending on {focus_areas} to reduce overall expenses and build a stronger financial foundation.",
+            f"Lessen spends on wants and entertainment to free up more for essentials like {focus_areas}.",
+            f"Cut back on non-essential entertainment and personal wants to better afford {focus_areas}.",
+            f"Redirect funds from entertainment and wants towards essentials like {focus_areas} for long-term benefits.",
+            f"Review and reduce entertainment expenses to prioritize essentials such as {focus_areas}.",
+            f"Avoid impulse buys on wants to ensure essentials like {focus_areas} are fully covered."
+        ]
+        secondary_tips_saved_too_much = [
+            f"Great job on saving! Treat yourself to something from {focus_desires} after hitting savings goals, but don't spend everything.",
+            f"Excellent savings progress! Enjoy a small indulgence from {focus_desires} once essentials are covered, keeping savings intact.",
+            f"Fantastic work saving! Reward yourself with a modest treat from {focus_desires} without depleting your balance.",
+            f"Keep up the great savings habit! Consider investing a portion of your savings for future growth while enjoying occasional {focus_desires}.",
+            f"Outstanding savings achievement! Use some savings for a small treat from {focus_desires} while maintaining your emergency fund.",
+            f"Well done on your savings! Balance rewards from {focus_desires} with continued saving to build wealth over time.",
+            f"Impressive savings rate! Reward your discipline with a small indulgence from {focus_desires}, then resume saving.",
+            f"Congratulations on saving! Allocate a small portion for fun from {focus_desires} while preserving the rest for security."
+        ]
+
+        # Calculate changes first
+        expense_change = 0
+        savings_change = 0
+        if has_yesterday_data:
+            if yesterday_expense > 0:
+                expense_change = ((today_expense - yesterday_expense) / yesterday_expense) * 100
+            if yesterday_savings != 0:
+                savings_change = ((today_savings - yesterday_savings) / abs(yesterday_savings)) * 100
+
+        # Define scenario-based tips for suggestion section based on expense change
+        if not has_today_data and not has_yesterday_data:
+            suggestion_tips = [
+                "💡 Tip: Start by tracking your daily coffee runs or lunch expenses. Small purchases add up quickly and seeing them can motivate better choices.",
+                "💡 Tip: Begin with essentials like groceries and transportation. Most people spend the most here, so tracking these first gives immediate insights.",
+                "💡 Tip: Don't worry about recording every tiny expense at first. Focus on the bigger ones like rent, utilities, and major purchases to build the habit.",
+                "💡 Tip: Think of tracking like a diet - you don't need to be perfect, just consistent. Even logging 3-4 transactions a day helps you see patterns.",
+                "💡 Tip: Start with your phone's note app if you don't have fancy tools. The key is getting comfortable with seeing where your money goes regularly."
+            ]
+        elif not has_today_data:
+            if expense_trend > 0:
+                suggestion_tips = [
+                    "💡 Tip: When expenses rise, most people find cutting dining out helps. Try cooking simple meals at home a few nights a week to save.",
+                    "💡 Tip: Review your subscriptions - many people forget about unused streaming services or gym memberships that cost $10-20 monthly.",
+                    "💡 Tip: Plan your grocery shopping with a list. People often buy impulsively in stores, leading to wasted food and higher bills.",
+                    "💡 Tip: If driving everywhere, try walking or biking for short trips. Gas and parking add up faster than most realize.",
+                    "💡 Tip: Wait 24 hours before non-essential purchases. That 'want' often fades, saving you money that could go toward real needs."
+                ]
+            elif expense_trend < 0:
+                suggestion_tips = [
+                    "💡 Tip: Great job saving! Many people put extra money into a high-interest savings account to earn a little interest while keeping it safe.",
+                    "💡 Tip: Build an emergency fund with your savings. Aim for 3 months of expenses - most people wish they had this during unexpected bills.",
+                    "💡 Tip: Keep the momentum by setting small savings goals. Like 'save $50 this week' - it feels achievable and builds good habits.",
+                    "💡 Tip: Treat yourself with a want after hitting savings goals - maybe a home movie night or a small affordable treat. Non-monetary rewards keep you motivated without spending everything.",
+                    "💡 Tip: Reflect on what worked. Did meal prepping help? Or skipping online shopping? Most people find repeating successful strategies leads to more savings."
+                ]
+            else:
+                suggestion_tips = [
+                    "💡 Tip: With stable spending, set up automatic transfers to savings. Many people forget to save consistently, so automation helps.",
+                    "💡 Tip: Review your budget categories. You might be overspending on entertainment while undersaving - adjust to match your priorities.",
+                    "💡 Tip: Track your spending triggers. For many, stress or boredom leads to unnecessary purchases - awareness helps control them.",
+                    "💡 Tip: Look for side gigs during stable times. Delivery apps, freelance work, or selling unused items can boost your income noticeably.",
+                    "💡 Tip: Use this calm period to learn about investing. Many people start with simple index funds through apps like Robinhood or Vanguard."
+                ]
+        elif not has_yesterday_data:
+            suggestion_tips = [
+                "💡 Tip: Add yesterday's transactions to see trends. Most people are surprised how much they spend on small essentials when they look back.",
+                "💡 Tip: Make it a habit to record expenses right after they happen. Waiting means forgetting smaller essential purchases like coffee or snacks.",
+                "💡 Tip: Start with big essentials first. Rent, groceries, and bills are usually the easiest to remember and most impactful.",
+                "💡 Tip: Complete data gives better comparisons. Without yesterday's info, you miss seeing if today was better or worse for essentials.",
+                "💡 Tip: Think of it like exercise tracking - consistency matters more than perfection. Even partial data helps you improve essential spending."
+            ]
+        else:
+            if yesterday_expense > 0 and expense_change > 10:
+                suggestion_tips = [
+                    "💡 Tip: Focus on essentials: When expenses jump, prioritize Food & Groceries first. Meal planning and store brands save money for other essentials.",
+                    "💡 Tip: Cut transportation essentials immediately. Try carpooling or public transit - it saves money and reduces stress for other needs.",
+                    "💡 Tip: Skip non-essentials for a week. That daily coffee habit adds up, freeing money for essentials like Bills and Transportation.",
+                    "💡 Tip: Implement the 24-hour rule for wants. Most impulse buys seem less important after thinking, saving for essentials.",
+                    "💡 Tip: Prioritize needs over wants. Ask 'Is this essential?' - most people find they can delay purchases to focus on Food & Groceries and Bills."
+                ]
+            elif yesterday_expense > 0 and expense_change < -10:
+                suggestion_tips = [
+                    "💡 Tip: With lower expenses, invest the difference in essentials. Many people start with retirement accounts for long-term security like future Bills.",
+                    "💡 Tip: Reward yourself with a want after essentials are covered. A small treat from savings feels good without spending everything on non-essentials.",
+                    "💡 Tip: Set goals to maintain low expenses on essentials. Like 'keep groceries under $100 this week' - specific targets help most people stay on track.",
+                    "💡 Tip: Note what reduced your spending on essentials. Was it cooking at home? Walking instead of driving? Most people benefit from repeating what works.",
+                    "💡 Tip: Increase savings rate now for essentials. When expenses are down, save more - many people aim to cover 20% of income for future needs."
+                ]
+            elif savings_change > 20:
+                suggestion_tips = [
+                    "💡 Tip: With growing savings, diversify into investments for essentials. Many people spread money across accounts for safety and future Bills.",
+                    "💡 Tip: Build emergency fund for essentials. Most advisors recommend 6-12 months of expenses for security during unexpected Food or Transport costs.",
+                    "💡 Tip: Automate contributions for essentials. Set up transfers automatically - most people find this ensures money for needs without temptation.",
+                    "💡 Tip: Look into tax-advantaged accounts for essentials. 401(k)s or IRAs grow money for retirement needs without immediate taxes.",
+                    "💡 Tip: Pay off high-interest debt first for essentials. Credit cards charge 15-25% interest, so using savings here frees money for Food & Groceries."
+                ]
+            elif savings_change < -20:
+                suggestion_tips = [
+                    "💡 Tip: Focus on essentials: When savings drop, optimize Food & Groceries and Transportation first. Small changes here help most people recover.",
+                    "💡 Tip: Audit recurring bills for essentials. Many people find duplicate services costing monthly that can be cut to save for needs.",
+                    "💡 Tip: Freeze non-essential spending temporarily. A 'no spend' week on entertainment frees money for essentials like Bills and Food.",
+                    "💡 Tip: Track every expense closely for essentials. Most people are shocked by how small purchases add up when monitoring carefully.",
+                    "💡 Tip: Rebalance budget focusing on essentials. Cut back on wants to prioritize needs and savings - many people find this restores stability."
+                ]
+            else:
+                suggestion_tips = [
+                    "💡 Tip: Create a budget focusing on essentials. Many people use 50/30/20: 50% needs (Food, Transport, Bills), 30% wants, 20% savings.",
+                    "💡 Tip: Track daily spending to catch leaks in essentials. Most people don't realize how $5 snacks prevent reaching goals for Bills or Food.",
+                    "💡 Tip: Always buy needs before wants for essentials. Ask 'Is this essential?' - this mindset helps most people make better decisions.",
+                    "💡 Tip: Set specific goals for essentials. Like 'Save $500 for emergency fund' - clear targets motivate more than vague 'save money' plans.",
+                    "💡 Tip: Do weekly check-ins focusing on essentials. Most people find reviewing progress helps stay on track and adjust for Food & Transport needs."
+                ]
+
+        # Select a random tip from the scenario-based list
+        selected_suggestion_tip = random.choice(suggestion_tips)
+
+        if not has_today_data and not has_yesterday_data:
+            print(color("No expenses or income recorded for today or yesterday. Start tracking your transactions to get personalized tips!", C.YELLOW))
+            print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+        elif not has_today_data:
+            # Base tip on expense/savings increase or decrease from last 7 days
+            if expense_trend > 0:
+                print(color(f"Based on the last 7 days, your expenses increased by ₱{expense_trend:.2f} yesterday compared to average. Focus on optimizing essentials today.", C.RED))
+                print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+            elif expense_trend < 0:
+                print(color(f"Based on the last 7 days, your expenses decreased by ₱{abs(expense_trend):.2f} yesterday compared to average. Good job!", C.GREEN))
+                print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+            else:
+                print(color("Your expenses are stable compared to the last 7 days. Keep up the consistent tracking!", C.YELLOW))
+                print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+        elif not has_yesterday_data:
+            print(color("No data from yesterday. Today's expenses: ₱{:.2f}, Income: ₱{:.2f}, Savings: ₱{:.2f}. Keep tracking to compare trends!".format(today_expense, today_income, today_savings), C.BLUE))
+            print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+        else:
+            # Base analysis on yesterday's data to advise today's spending
+            if yesterday_expense > 0:
+                expense_change = ((today_expense - yesterday_expense) / yesterday_expense) * 100
+                if expense_change > 0:
+                    expense_msg = color(f"Your expenses increased by {expense_change:.1f}% compared to yesterday (₱{yesterday_expense:.2f} to ₱{today_expense:.2f}).", C.RED)
+                elif expense_change < 0:
+                    expense_msg = color(f"Your expenses decreased by {abs(expense_change):.1f}% compared to yesterday (₱{yesterday_expense:.2f} to ₱{today_expense:.2f}).", C.GREEN)
+                else:
+                    expense_msg = color("Your expenses remained the same as yesterday.", C.YELLOW)
+            else:
+                expense_msg = color(f"Yesterday had no expenses, today you spent ₱{today_expense:.2f}.", C.BLUE)
+
+            if yesterday_savings != 0:
+                savings_change = ((today_savings - yesterday_savings) / abs(yesterday_savings)) * 100
+                if savings_change > 0:
+                    savings_msg = color(f"Your savings increased by {savings_change:.1f}% compared to yesterday (₱{yesterday_savings:.2f} to ₱{today_savings:.2f}).", C.GREEN)
+                elif savings_change < 0:
+                    savings_msg = color(f"Your savings decreased by {abs(savings_change):.1f}% compared to yesterday (₱{yesterday_savings:.2f} to ₱{today_savings:.2f}).", C.RED)
+                else:
+                    savings_msg = color("Your savings remained the same as yesterday.", C.YELLOW)
+            else:
+                savings_msg = color(f"Yesterday had no savings, today your savings are ₱{today_savings:.2f}.", C.BLUE)
+
+            print(expense_msg)
+            print(savings_msg)
+
+            # Tips based on yesterday's data for today's spending, prioritizing essentials
+            if yesterday_expense > 0:
+                if expense_change > 10:
+                    print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+                    if top_essentials:
+                        secondary_tip = random.choice(secondary_tips_spend_too_much)
+                        print(color(secondary_tip, C.BLUE))
+                elif expense_change < -10:
+                    print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+                elif savings_change > 20:
+                    print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+                    if top_essentials:
+                        secondary_tip = random.choice(secondary_tips_saved_too_much)
+                        print(color(secondary_tip, C.BLUE))
+                elif savings_change < -20:
+                    print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+                    if top_essentials:
+                        secondary_tip = random.choice(secondary_tips_spend_too_much)
+                        print(color(secondary_tip, C.BLUE))
+                else:
+                    print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+            else:
+                print(color(selected_suggestion_tip, C.CYAN, C.BOLD))
+
+        print()
 
         # Options Section
         print(color("------ Options ------", C.BOLD))
         print(color("1. Add Record", C.WHITE))
         print(color("2. View History", C.WHITE))
         print(color("3. Edit Record", C.WHITE))
-        print(color("4. Logout", C.WHITE))
+        print(color("4. Delete Record", C.WHITE))
+        print(color("5. Logout", C.WHITE))
 
         choice = input("Choose an option: ").strip()
 
@@ -650,6 +1376,8 @@ def dashboard(data, username):
         elif choice == "3":
             edit_record(data, username)
         elif choice == "4":
+            delete_record(data, username)
+        elif choice == "5":
             break
         else:
             print("Invalid choice.")
@@ -663,6 +1391,9 @@ def main():
         print(color("----------------", C.BOLD))
         print(color("Track expenses and income.\nNo more disappearing Money!", C.DIM))
         print()
+
+
+
         print(color("Please choose a function:", C.BOLD))
         print(color("1. Sign Up", C.WHITE))
         print(color("2. Login", C.WHITE))
