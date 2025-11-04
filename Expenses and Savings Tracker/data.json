@@ -1,11 +1,48 @@
 {
     "users": {
-        "testuser": {
-            "email": "test@example.com",
-            "password": "d9b5f58f0b38198293971865a14074f59eba3e82595becbe86ae51f1d9f1f65e"
+        "tan": {
+            "email": "tristan@gmail.com",
+            "password": "aA1"
         }
     },
     "transactions": {
-        "testuser": []
+        "tan": [
+            {
+                "id": 1,
+                "date": "2025-11-03",
+                "type": "Expense",
+                "amount": 119.0,
+                "category": "Transportation",
+                "description": "N/A",
+                "timestamp": "2025-11-04T22:04:08.526725"
+            },
+            {
+                "id": 2,
+                "date": "2025-11-02",
+                "type": "Income",
+                "amount": 1000.0,
+                "category": "Allowance",
+                "description": "N/A",
+                "timestamp": "2025-11-04T22:14:28.093372"
+            },
+            {
+                "id": 3,
+                "date": "2025-11-04",
+                "type": "Expense",
+                "amount": 50.0,
+                "category": "Food & Groceries",
+                "description": "N/A",
+                "timestamp": "2025-11-04T22:15:10.047007"
+            },
+            {
+                "id": 4,
+                "date": "2025-11-04",
+                "type": "Expense",
+                "amount": 100.0,
+                "category": "Personal Needs",
+                "description": "haircutt",
+                "timestamp": "2025-11-04T22:15:40.468965"
+            }
+        ]
     }
 }

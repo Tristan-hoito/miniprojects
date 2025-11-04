@@ -20,11 +20,52 @@ class C:
     GRAY = "\033[90m"
     WHITE = "\033[37m"
 
+# Transaction display widths
+ID_WIDTH = 6
+DATE_WIDTH = 12
+TYPE_WIDTH = 8
+AMOUNT_WIDTH = 12
+CATEGORY_WIDTH = 20
+DESC_WIDTH = 25
+
 
 def color(text, *styles):
     if not styles:
         return text
     return "".join(styles) + str(text) + C.RESET
+
+def strip_ansi(s):
+    import re
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    return ansi_escape.sub('', s)
+
+def truncate_to_display_width(text, width):
+    plain = strip_ansi(text)
+    if len(plain) <= width:
+        return text
+    # Truncate plain to width, then find corresponding index in text
+    truncated_plain = plain[:width]
+    idx = 0
+    plain_idx = 0
+    while plain_idx < len(truncated_plain) and idx < len(text):
+        if text[idx] == '\x1B':
+            # Skip ANSI sequence
+            idx += 1
+            while idx < len(text) and text[idx] != 'm':
+                idx += 1
+            if idx < len(text):
+                idx += 1
+        else:
+            plain_idx += 1
+            idx += 1
+    return text[:idx]
+
+def pad_to_display_width(text, width):
+    plain = strip_ansi(text)
+    if len(plain) >= width:
+        return truncate_to_display_width(text, width)
+    padding = width - len(plain)
+    return text + ' ' * padding
 
 # --- Helper Functions ---
 def clear_terminal():
@@ -205,17 +246,17 @@ def add_record(data, username):
 
         # Validate category based on type
         if type_ == "Expense":
-            expense_categories = ["Food & Groceries", "Transportation", "Entertainment", "Personal Needs", "Personal Wants", "Bills", "School/Work"]
+            expense_categories = ["Food & Groceries", "Transportation", "Entertainment", "Personal Needs", "Personal Wants", "Health & Fitness", "Bills", "School/Work"]
             print(color("\nSelect expense category:", C.BOLD))
             for i, cat in enumerate(expense_categories, 1):
                 print(f"{i}. {cat}")
             while True:
-                cat_choice = input("Choose (1-7): ").strip()
-                if cat_choice.isdigit() and 1 <= int(cat_choice) <= 7:
+                cat_choice = input("Choose (1-8): ").strip()
+                if cat_choice.isdigit() and 1 <= int(cat_choice) <= 8:
                     category = expense_categories[int(cat_choice) - 1]
                     break
                 else:
-                    print("❌ Invalid choice. Enter 1-7.")
+                    print("❌ Invalid choice. Enter 1-8.")
         else:  # Income
             income_categories = ["Allowance", "Work", "Reward", "Gift"]
             print(color("\nSelect income category:", C.BOLD))
@@ -303,7 +344,7 @@ def view_history(data, username):
         type_choice = input("Choose (1 or 2): ").strip()
         if type_choice == "1":
             type_ = "Expense"
-            categories = ["Food & Groceries", "Transportation", "Entertainment", "Personal Needs", "Personal Wants", "Bills", "School/Work"]
+            categories = ["Food & Groceries", "Transportation", "Entertainment", "Personal Needs", "Personal Wants", "Health & Fitness", "Bills", "School/Work"]
         elif type_choice == "2":
             type_ = "Income"
             categories = ["Allowance", "Work", "Reward", "Gift"]
@@ -1037,17 +1078,17 @@ def edit_record(data, username):
             # Edit category based on current type
             clear_terminal()
             if transaction["type"] == "Expense":
-                expense_categories = ["Food & Groceries", "Transportation", "Entertainment", "Personal Needs", "Personal Wants", "Bills", "School/Work"]
+                expense_categories = ["Food & Groceries", "Transportation", "Entertainment", "Personal Needs", "Personal Wants", "Health & Fitness", "Bills", "School/Work"]
                 print(color("Select new expense category:", C.BOLD))
                 for i, cat in enumerate(expense_categories, 1):
                     print(f"{i}. {cat}")
                 while True:
-                    cat_choice = input("Choose (1-7): ").strip()
-                    if cat_choice.isdigit() and 1 <= int(cat_choice) <= 7:
+                    cat_choice = input("Choose (1-8): ").strip()
+                    if cat_choice.isdigit() and 1 <= int(cat_choice) <= 8:
                         transaction["category"] = expense_categories[int(cat_choice) - 1]
                         break
                     else:
-                        print("❌ Invalid choice. Enter 1-7.")
+                        print("❌ Invalid choice. Enter 1-8.")
             else:  # Income
                 income_categories = ["Allowance", "Work", "Reward", "Gift"]
                 print(color("Select new income category:", C.BOLD))
@@ -1132,58 +1173,40 @@ def dashboard(data, username):
 
 
 
-        # Financial Summary Section
-        print(color("------ Financial Summary ------", C.BOLD))
-        print(color(f"Total Income: ₱{total_income:.2f}", C.GREEN))
-        print(color(f"Total Expenses: ₱{total_expense:.2f}", C.RED))
-        bal_color = C.GREEN if balance >= 0 else C.RED
-        print(color(f"Total Balance: ₱{balance:.2f}", bal_color, C.BOLD))
-        print()
-
-        # Income Breakdown Section
-        if income_summary:
-            print(color("------ Income Breakdown ------", C.BOLD))
-            for cat in sorted(income_summary.keys()):
-                pct = (income_summary[cat] / total_income * 100) if total_income > 0 else 0
-                print(f"  - {cat}: ₱{income_summary[cat]:.2f} ({pct:.1f}%)")
-            print()
-
-        # Expense Breakdown Section
-        if expense_summary:
-            print(color("------ Expense Breakdown ------", C.BOLD))
-            for cat in sorted(expense_summary.keys()):
-                pct = (expense_summary[cat] / total_expense * 100) if total_expense > 0 else 0
-                print(f"  - {cat}: ₱{expense_summary[cat]:.2f} ({pct:.1f}%)")
-            print()
-
         # Calculate data for analytics and tips
         today = datetime.now().date()
         yesterday = today - timedelta(days=1)
         today_str = today.strftime("%Y-%m-%d")
         yesterday_str = yesterday.strftime("%Y-%m-%d")
-
         today_expense = sum(t["amount"] for t in transactions if t["type"] == "Expense" and t["date"] == today_str)
         yesterday_expense = sum(t["amount"] for t in transactions if t["type"] == "Expense" and t["date"] == yesterday_str)
         today_income = sum(t["amount"] for t in transactions if t["type"] == "Income" and t["date"] == today_str)
         yesterday_income = sum(t["amount"] for t in transactions if t["type"] == "Income" and t["date"] == yesterday_str)
-
         today_savings = today_income - today_expense
         yesterday_savings = yesterday_income - yesterday_expense
-
         has_today_data = today_expense > 0 or today_income > 0
         has_yesterday_data = yesterday_expense > 0 or yesterday_income > 0
 
-        # Analytics Section
-        print(color("------ Analytics ------", C.BOLD))
+        # Financial Summary and Analytics Sections (side by side)
+        bal_color = C.GREEN if balance >= 0 else C.RED
+        fs_lines = [
+            color("-------------------- Financial Summary --------------------", C.BOLD),
+            color(f"Total Income: ₱{total_income:.2f}", C.GREEN),
+            color(f"Total Expenses: ₱{total_expense:.2f}", C.RED),
+            color(f"Total Balance: ₱{balance:.2f}", bal_color, C.BOLD),
+            ""
+        ]
+        # Analytics
+        an_lines = [color("-------------------- Analytics --------------------" + " " * 9, C.BOLD)]
         unique_dates = set(t["date"] for t in transactions)
         num_days = len(unique_dates) if unique_dates else 1
         avg_expense_per_day = total_expense / num_days if num_days > 0 else 0
         avg_income_per_day = total_income / num_days if num_days > 0 else 0
         avg_savings_per_day = total_savings / num_days if num_days > 0 else 0
-        print(color(f"Average Expense per Day: ₱{avg_expense_per_day:.2f}", C.RED))
-        print(color(f"Average Income per Day: ₱{avg_income_per_day:.2f}", C.GREEN))
-        print(color(f"Average Savings per Day: ₱{avg_savings_per_day:.2f}", C.YELLOW))
-        print(color(f"Total Days Tracked: {num_days}", C.WHITE))
+        an_lines.append(color(f"Average Expense per Day: ₱{avg_expense_per_day:.2f}", C.RED))
+        an_lines.append(color(f"Average Income per Day: ₱{avg_income_per_day:.2f}", C.GREEN))
+        an_lines.append(color(f"Average Savings per Day: ₱{avg_savings_per_day:.2f}", C.YELLOW))
+        an_lines.append(color(f"Total Days Tracked: {num_days}", C.WHITE))
         if has_today_data and has_yesterday_data:
             if yesterday_expense > 0:
                 expense_change_val = ((today_expense - yesterday_expense) / yesterday_expense) * 100
@@ -1200,23 +1223,59 @@ def dashboard(data, username):
                 if savings_change_val > 0:
                     savings_msg = color(f"Savings increased by {savings_change_val:.1f}% (₱{yesterday_savings:.2f} to ₱{today_savings:.2f}).", C.YELLOW)
                 elif savings_change_val < 0:
-                    savings_msg = color(f"Savings decreased by {abs(savings_change_val):.1f}% (₱{yesterday_savings:.2f} to ₱{today_savings:.2f}).", C.YELLOW)
+                    savings_msg = color(f"Savings decreased by {abs(savings_change_val):.1f}% (₱{yesterday_savings:.2f} to ₱{today_savings:.2f}).", C.RED)
                 else:
                     savings_msg = color("Savings same as yesterday.", C.YELLOW)
             else:
                 savings_msg = color(f"No savings yesterday for percentage calculation.", C.BLUE)
-            print(expense_msg)
-            print(savings_msg)
+            an_lines.append(expense_msg)
+            an_lines.append(savings_msg)
         elif has_yesterday_data:
-            print(color(f"No records for today. Yesterday's expenses: ₱{yesterday_expense:.2f}, Income: ₱{yesterday_income:.2f}, Savings: ₱{yesterday_savings:.2f}.", C.MAGENTA))
+            an_lines.append(color(f"No records for today. Yesterday's expenses: ₱{yesterday_expense:.2f}, Income: ₱{yesterday_income:.2f}, Savings: ₱{yesterday_savings:.2f}.", C.MAGENTA))
         elif has_today_data:
-            print(color(f"No records for yesterday. Today's expenses: ₱{today_expense:.2f}, Income: ₱{today_income:.2f}, Savings: ₱{today_savings:.2f}.", C.MAGENTA))
+            an_lines.append(color(f"No records for yesterday. Today's expenses: ₱{today_expense:.2f}, Income: ₱{today_income:.2f}, Savings: ₱{today_savings:.2f}.", C.MAGENTA))
         else:
-            print(color("No recent data for daily change calculations.", C.MAGENTA))
+            an_lines.append(color("No recent data for daily change calculations.", C.MAGENTA))
+        an_lines.append("")
+        # Print side by side with fixed widths for better alignment
+        analytics_width = 60
+        financial_width = 60
+        max_len = max(len(fs_lines), len(an_lines))
+        for i in range(max_len):
+            fs = fs_lines[i] if i < len(fs_lines) else ""
+            an = an_lines[i] if i < len(an_lines) else ""
+            an_padded = pad_to_display_width(an, analytics_width)
+            fs_padded = pad_to_display_width(fs, financial_width)
+            line = f"{an_padded}  |  {fs_padded}"
+            print(line)
         print()
+        # Income and Expense Breakdown Sections (side by side)
+        ib_lines = []
+        if income_summary:
+            ib_lines.append(color("-------------------- Income Breakdown --------------------", C.BOLD))
+            for cat in sorted(income_summary.keys()):
+                pct = (income_summary[cat] / total_income * 100) if total_income > 0 else 0
+                ib_lines.append(f"  - {cat}: ₱{income_summary[cat]:.2f} ({pct:.1f}%)")
+            ib_lines.append("")
+        eb_lines = []
+        if expense_summary:
+            eb_lines.append(color("-------------------- Expense Breakdown --------------------", C.BOLD))
+            for cat in sorted(expense_summary.keys()):
+                pct = (expense_summary[cat] / total_expense * 100) if total_expense > 0 else 0
+                eb_lines.append(f"  - {cat}: ₱{expense_summary[cat]:.2f} ({pct:.1f}%)")
+            eb_lines.append("")
+        # Print side by side
+        max_len = max(len(ib_lines), len(eb_lines))
+        for i in range(max_len):
+            ib = ib_lines[i] if i < len(ib_lines) else ""
+            eb = eb_lines[i] if i < len(eb_lines) else ""
+            eb_padded = pad_to_display_width(eb, 60)
+            ib_padded = pad_to_display_width(ib, 60)
+            print(f"{eb_padded}  |  {ib_padded}")
 
         # Suggestion Section - Provides personalized financial tips based on user's spending patterns
-        print(color("------ Suggestion ------", C.BOLD))
+        print()
+        print(color("-------------------- Suggestion --------------------", C.BOLD))
 
         # Calculate expense trend over last 7 days for cases with no today data
         # This helps provide tips when daily data is missing
@@ -1232,7 +1291,7 @@ def dashboard(data, username):
             if t["type"] == "Expense":
                 expense_categories[t["category"]] = expense_categories.get(t["category"], 0) + t["amount"]
 
-        essentials = ["Food & Groceries", "Transportation", "School/Work", "Personal Needs", "Bills"]
+        essentials = ["Food & Groceries", "Transportation", "School/Work", "Personal Needs", "Bills", "Health & Fitness"]
         desires = ["Entertainment", "Personal Wants"]
 
         top_essentials = sorted([(cat, amt) for cat, amt in expense_categories.items() if cat in essentials], key=lambda x: essentials.index(x[0]))
@@ -1454,7 +1513,7 @@ def dashboard(data, username):
         print()
 
         # Options Section
-        print(color("------ Options ------", C.BOLD))
+        print(color("-------------------- Options --------------------", C.BOLD))
         print(color("1. Add Record", C.WHITE))
         print(color("2. View History", C.WHITE))
         print(color("3. Edit Record", C.WHITE))
