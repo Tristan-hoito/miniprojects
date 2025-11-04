@@ -11,7 +11,7 @@ Ever wondered where your money goes? 😅 This Python-based tracker lets you sig
 ## ✨ Features
 
 - **👤 User Management**: Sign up with email and password, login with username or email. 🔐
-- **📝 Record Management**: Add, view, edit, and delete expense/income records with categories like Food & Groceries, Transportation, Entertainment, Personal Needs, Personal Wants, Bills, School/Work for expenses, and Allowance, Work, Reward, Gift for income. ✏️
+- **📝 Record Management**: Add, view, edit, and delete expense/income records with categories like Food & Groceries, Transportation, Entertainment, Personal Needs, Personal Wants, Health & Fitness, Bills, School/Work for expenses, and Allowance, Work, Reward, Gift for income. ✏️
 - **📈 Dashboard**: View financial summary, breakdowns by category, analytics (average expense/income per day, total days tracked, daily changes), and personalized tips based on your spending patterns. 📊
 - **🔍 History Filters**: Filter transactions by all, category, date (today, yesterday, by day/week/month/year), type (Income/Expense), recent, or specific date. 🔎
 - **💡 Smart Tips & Suggestions**: Dynamic tips tailored to your daily spending changes, focusing on essentials vs. wants. 💡
@@ -41,5 +41,6 @@ No external dependencies required – pure Python magic! ✨
 ---
 
 Made with ❤️ for better financial habits. Happy tracking! 🎉
+
 
 
