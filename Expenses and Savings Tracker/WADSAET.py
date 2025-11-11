@@ -1156,6 +1156,10 @@ def dashboard(data, username):
         balance = total_income - total_expense
         total_savings = balance
 
+        # Define today_str early
+        today = datetime.now().date()
+        today_str = today.strftime("%Y-%m-%d")
+
         # Calculate summaries by category
         income_summary = {}
         expense_summary = {}
@@ -1164,6 +1168,15 @@ def dashboard(data, username):
                 income_summary[t["category"]] = income_summary.get(t["category"], 0) + t["amount"]
             elif t["type"] == "Expense":
                 expense_summary[t["category"]] = expense_summary.get(t["category"], 0) + t["amount"]
+
+        today_income_summary = {}
+        today_expense_summary = {}
+        for t in transactions:
+            if t["date"] == today_str:
+                if t["type"] == "Income":
+                    today_income_summary[t["category"]] = today_income_summary.get(t["category"], 0) + t["amount"]
+                elif t["type"] == "Expense":
+                    today_expense_summary[t["category"]] = today_expense_summary.get(t["category"], 0) + t["amount"]
 
         print(color("Dashboard", C.BOLD))
         print(color("----------------", C.BOLD))
@@ -1189,15 +1202,21 @@ def dashboard(data, username):
 
         # Financial Summary and Analytics Sections (side by side)
         bal_color = C.GREEN if balance >= 0 else C.RED
+        today_balance = today_income - today_expense
+        today_bal_color = C.GREEN if today_balance >= 0 else C.RED
         fs_lines = [
-            color("-------------------- Financial Summary --------------------", C.BOLD),
+            color("-" * 15 + " Financial Summary " + "-" * 15, C.BOLD),
             color(f"Total Income: ₱{total_income:.2f}", C.GREEN),
             color(f"Total Expenses: ₱{total_expense:.2f}", C.RED),
             color(f"Total Balance: ₱{balance:.2f}", bal_color, C.BOLD),
+            "",
+            color(f"Today's Income: ₱{today_income:.2f}", C.GREEN),
+            color(f"Today's Expenses: ₱{today_expense:.2f}", C.RED),
+            color(f"Today's Balance: ₱{today_balance:.2f}", today_bal_color, C.BOLD),
             ""
         ]
         # Analytics
-        an_lines = [color("-------------------- Analytics --------------------" + " " * 9, C.BOLD)]
+        an_lines = [color("-" * 15 + " Analytics " + "-" * 15, C.BOLD)]
         unique_dates = set(t["date"] for t in transactions)
         num_days = len(unique_dates) if unique_dates else 1
         avg_expense_per_day = total_expense / num_days if num_days > 0 else 0
@@ -1252,18 +1271,32 @@ def dashboard(data, username):
         # Income and Expense Breakdown Sections (side by side)
         ib_lines = []
         if income_summary:
-            ib_lines.append(color("-------------------- Income Breakdown --------------------", C.BOLD))
+            ib_lines.append(color("-" * 15 + " Income Breakdown " + "-" * 15, C.BOLD))
             for cat in sorted(income_summary.keys()):
                 pct = (income_summary[cat] / total_income * 100) if total_income > 0 else 0
                 ib_lines.append(f"  - {cat}: ₱{income_summary[cat]:.2f} ({pct:.1f}%)")
             ib_lines.append("")
+            # Today's Income Breakdown subsection
+            if today_income_summary:
+                ib_lines.append(color("-" * 15 + " Today's Income Breakdown " + "-" * 15, C.BOLD))
+                for cat in sorted(today_income_summary.keys()):
+                    pct = (today_income_summary[cat] / today_income * 100) if today_income > 0 else 0
+                    ib_lines.append(f"  - {cat}: ₱{today_income_summary[cat]:.2f} ({pct:.1f}%)")
+                ib_lines.append("")
         eb_lines = []
         if expense_summary:
-            eb_lines.append(color("-------------------- Expense Breakdown --------------------", C.BOLD))
+            eb_lines.append(color("-" * 15 + " Expense Breakdown " + "-" * 15, C.BOLD))
             for cat in sorted(expense_summary.keys()):
                 pct = (expense_summary[cat] / total_expense * 100) if total_expense > 0 else 0
                 eb_lines.append(f"  - {cat}: ₱{expense_summary[cat]:.2f} ({pct:.1f}%)")
             eb_lines.append("")
+            # Today's Expense Breakdown subsection
+            if today_expense_summary:
+                eb_lines.append(color("-" * 15 + " Today's Expense Breakdown " + "-" * 15, C.BOLD))
+                for cat in sorted(today_expense_summary.keys()):
+                    pct = (today_expense_summary[cat] / today_expense * 100) if today_expense > 0 else 0
+                    eb_lines.append(f"  - {cat}: ₱{today_expense_summary[cat]:.2f} ({pct:.1f}%)")
+                eb_lines.append("")
         # Print side by side
         max_len = max(len(ib_lines), len(eb_lines))
         for i in range(max_len):
@@ -1275,7 +1308,7 @@ def dashboard(data, username):
 
         # Suggestion Section - Provides personalized financial tips based on user's spending patterns
         print()
-        print(color("-------------------- Suggestion --------------------", C.BOLD))
+        print(color("-" * 15 + " Suggestion " + "-" * 15, C.BOLD))
 
         # Calculate expense trend over last 7 days for cases with no today data
         # This helps provide tips when daily data is missing
@@ -1313,7 +1346,12 @@ def dashboard(data, username):
             f"Review and reduce {focus_desires} expenses to prioritize essentials.",
             f"Avoid impulse buys on {focus_desires} to ensure essentials are covered.",
             f"Track daily expenses on {focus_desires} to identify areas for cost reduction and better budgeting.",
-            f"Set weekly limits for {focus_desires} to prevent overspending and encourage mindful purchasing."
+            f"Set weekly limits for {focus_desires} to prevent overspending and encourage mindful purchasing.",
+            f"Compare prices for {focus_desires} items to find better deals and save money.",
+            f"Delay gratification by waiting before buying {focus_desires} to see if you really need them.",
+            f"Substitute cheaper alternatives for {focus_desires} to maintain satisfaction without high costs.",
+            f"Use cash instead of cards for {focus_desires} to make spending feel more real and reduce impulse buys.",
+            f"Create a 'no spend' day each week to break the habit of unnecessary {focus_desires} purchases."
         ]
 
         secondary_tips_saved_too_much = [
@@ -1513,7 +1551,7 @@ def dashboard(data, username):
         print()
 
         # Options Section
-        print(color("-------------------- Options --------------------", C.BOLD))
+        print(color("-" * 15 + " Options " + "-" * 15, C.BOLD))
         print(color("1. Add Record", C.WHITE))
         print(color("2. View History", C.WHITE))
         print(color("3. Edit Record", C.WHITE))
